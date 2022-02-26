@@ -1,5 +1,7 @@
 #include <vector>
 #include "Maze.h"
+#include "Player.h"
+#include "Constants.h"
 
 
 class Game
@@ -7,6 +9,7 @@ class Game
 
 public:
 	Maze* maze;
+	std::vector<Player*> players;
 
 	Game();
 

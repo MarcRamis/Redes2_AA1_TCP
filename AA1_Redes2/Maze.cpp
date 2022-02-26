@@ -129,3 +129,15 @@ Maze::Maze()
 		deck.push(tmpDeck[i]);
 	}
 }
+
+std::vector<Card*> Maze::DealCards(unsigned int maxCardsToDeal)
+{
+	std::vector<Card*> tmpHand;
+
+	for (int i = 0; i < maxCardsToDeal; i++)
+	{
+		tmpHand.push_back(deck.top());
+		deck.pop();
+	}
+	return tmpHand;
+}
