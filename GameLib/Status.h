@@ -5,7 +5,7 @@
 class Status
 {
 public:
-	enum class EStatusType { DONE, DISCONNECTED, PARTIAL, ERROR, NOTREADY };
+	enum class EStatusType { DONE, DISCONNECTED, PARTIAL, ERROR, NOTREADY, NONE };
 
 private:
 
@@ -44,6 +44,7 @@ public:
 			break;
 		default:
 			std::cout << "Error something happened. No status type" << std::endl;
+			type = EStatusType::NONE;
 			break;
 		}
 		return type;

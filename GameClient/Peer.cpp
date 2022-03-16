@@ -2,6 +2,7 @@
 
 #include <Selector.h>
 #include "Protocol.h"
+#include "Constants.h"
 
 #include <vector>
 #include <thread>
@@ -58,7 +59,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 						packet.Read(&currentPlayers);
 						packet.Read(&hasPassWord);
 						
-						std::cout << "Nombre de la partida: " << serverName << " Jugadores: " << currentPlayers << " / " << maxPlayers << " Tiene contraseña: ";
+						std::cout << "Game name: " << serverName << " Players: " << currentPlayers << " / " << maxPlayers << " Password?: ";
 						if (hasPassWord) 
 							std::cout << "Yes" << std::endl;
 						else
@@ -268,7 +269,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool* _exitBSS, bool* _continueBSS)
 {
 	TcpSocket* sock = new TcpSocket();
-	sock->Connect("localhost", 50000);
+	sock->Connect(IP, PORT);
 
 	_localPort = sock->GetLocalPort().port;
 	// std::cout << "Port: " << _localPort << std::endl;
@@ -278,7 +279,7 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 
 	// Parameters to write
 	std::string opc;
-	int numPlayers;
+	int numPlayers = 0;
 	bool hasPassword = false;
 
 	do
@@ -287,9 +288,9 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 		{
 			continue;
 		}
-		std::cout << "1 - Crear una partida " << std::endl 
-			<< "2 - Ver lista de partidas" << std::endl 
-			<< "3 - Unirte a una partida" << std::endl;
+		std::cout << "1 - Create game" << std::endl 
+			<< "2 - Games list" << std::endl 
+			<< "3 - Join game" << std::endl;
 
 		std::cin >> opc;
 		
@@ -299,22 +300,39 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 		{
 			pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::CREATEMATCH));
 
-			std::cout << "Escribe el nombre de la partida: " << std::endl;
+			std::cout << "Write game name: " << std::endl;
 			std::cin >> opc;
 			pack.WriteString(opc);
 			
-			std::cout << "Escribe el numero de jugadores: " << std::endl;
-			std::cin >> numPlayers;
+			std::cout << "Write max players (" << MIN_PLAYERS << " - " << MAX_PLAYERS << "):" << std::endl;
+			do
+			{
+				std::cin >> numPlayers;
+				if (numPlayers < MIN_PLAYERS || numPlayers > MAX_PLAYERS)
+				{
+					std::cout << "Write max players (" << MIN_PLAYERS << " - " << MAX_PLAYERS << "):" << std::endl;
+				}
+
+			} while (numPlayers < MIN_PLAYERS || numPlayers > MAX_PLAYERS);
 			pack.Write(numPlayers);
 			
-			std::cout << "Servidor con password: 1-Si 2-No " << std::endl;
-			std::cin >> numPlayers;
+			std::cout << "Password?: 1-Yes 2-No " << std::endl;
+			do
+			{
+				std::cin >> numPlayers;
+				if (numPlayers != 1 && numPlayers != 2)
+				{
+					std::cout << "Password?: 1-Yes 2-No " << std::endl;
+				}
+
+			} while (numPlayers != 1 && numPlayers != 2);
+			
 			if (numPlayers == 1)
 			{
 				hasPassword = true;
 				pack.Write(hasPassword);
-
-				std::cout << "Escribe la password: " << std::endl;
+				
+				std::cout << "Write the password: " << std::endl;
 				std::cin >> opc;
 				pack.WriteString(opc);
 			}
@@ -324,8 +342,13 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 				pack.Write(hasPassword);
 			}
 
-			pack.Write(_localPort);
+			// Random seed 
+			unsigned int randomSeed = unsigned int(time(NULL));
+			srand(randomSeed);
+			pack.Write(randomSeed);
 
+			pack.Write(_localPort);
+			
 			Status status = sock->Send(pack);
 			if (status.GetStatus() != Status::EStatusType::DONE)
 			{
@@ -346,7 +369,7 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 		{
 			pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::JOINMATCH));
 			
-			std::cout << "Escribe el nombre de la partida: " << std::endl;
+			std::cout << "Write game name to join: " << std::endl;
 			std::cin >> opc;
 			pack.WriteString(opc);
 			
@@ -384,25 +407,20 @@ int main()
 
 	while (opc != "e")
 	{
-		std::cout << "Escribe un mensaje:" << std::endl;
+		std::cout << "Write a message: " << std::endl;
 		std::getline(std::cin, opc);
 
 		OutputMemoryStream pack;
-		
-		if (opc != "e")
-		{
-			pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
-			pack.WriteString(opc);
-			
-			for (size_t i = 0; i < clientes.size(); i++)
-			{
-				Status status = (clientes.at(i))->Send(pack);
-				if (status.GetStatus() != Status::EStatusType::DONE)
-				{
-					std::cout << "El mensaje enviado Peer2Peer no se ha enviado: " << std::endl;
-				}
-			}
+		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
+		pack.WriteString(opc);
 
+		for (size_t i = 0; i < clientes.size(); i++)
+		{
+			Status status = (clientes.at(i))->Send(pack);
+			if (status.GetStatus() != Status::EStatusType::DONE)
+			{
+				std::cout << "El mensaje enviado Peer2Peer no se ha enviado: " << std::endl;
+			}
 		}
 	} 
 

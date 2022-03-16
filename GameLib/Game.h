@@ -6,7 +6,7 @@
 
 class Game
 {
-	
+
 public:
 	Maze* maze;
 	std::vector<Player*> players;
