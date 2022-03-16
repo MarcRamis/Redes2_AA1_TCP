@@ -4,6 +4,7 @@
 #include "Protocol.h"
 #include "Constants.h"
 #include "Player.h"
+#include "ConsoleControl.h"
 
 #include <vector>
 #include <thread>
@@ -12,15 +13,59 @@
 #include <list>
 
 std::mutex mtxConexiones;
-unsigned int _localPort;
+
+// Player variables
+unsigned short _localPort;
 Player player;
+
+// Protocol variables
 std::vector<bool> gameReady;
 bool gameStart = false;
-bool isChat = true;
+bool isChat = false;
+
+void StartGame(std::vector<TcpSocket*>* _clientes)
+{
+	ConsoleClear();
+	std::cout << "DEALING CARDS" << std::endl;
+	ConsoleWait(2000.f);
+	
+	srand(player.randomSeed);
+	
+	player.maze = new Maze();
+	
+	for (int i = 0; i < _clientes->size() + 1; i++)
+	{
+		std::cout << i << "  ";
+		if (i == player.idTurn)
+		{
+			//std::cout << "My cards: " << std::endl;
+			player.hand = player.maze->DealCards(CARDS_TO_DEAL);
+			for (Card* c : player.hand)
+			{
+				c->Draw();
+			}
+			std::cout << std::endl;
+		}
+		else
+		{
+			std::vector<Card*> cards = player.maze->DealCards(CARDS_TO_DEAL);
+			player.otherhands.push_back(&cards);
+
+			//std::cout << "Other player cards: " << std::endl;
+			for (auto c : player.otherhands)
+			{
+				for (auto c2 : *c)
+				{
+					c2->Draw();
+				}
+			}
+			std::cout << std::endl;
+		}
+	}
+}
 
 void AskIfReady(std::vector<TcpSocket*>* _clientes)
 {
-	isChat = false;
 	std::cout << "Are you ready? 1 - Yes" << std::endl;
 	int ackReady;
 	do
@@ -37,7 +82,11 @@ void AskIfReady(std::vector<TcpSocket*>* _clientes)
 	{
 		OutputMemoryStream pack;
 		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::ISREADY));
-		_clientes->at(i)->Send(pack);
+		Status status = _clientes->at(i)->Send(pack);
+		if (status.GetStatus() != Status::EStatusType::DONE)
+		{
+			std::cout << "El mensaje 'is ready' Peer2Peer no se ha enviado: " << std::endl;
+		}
 	}
 	
 	while (!gameStart)
@@ -51,6 +100,7 @@ void AskIfReady(std::vector<TcpSocket*>* _clientes)
 		}
 	}
 	isChat = true;
+	StartGame(_clientes);
 }
 
 void Chat(std::vector<TcpSocket*>* _clientes)
@@ -62,9 +112,8 @@ void Chat(std::vector<TcpSocket*>* _clientes)
 		if (isChat)
 		{
 			std::cout << "Write a message: " << std::endl;
-			//std::getline(std::cin, opc);
-			std::cin >> opc;
-
+			std::getline(std::cin, opc);
+			
 			OutputMemoryStream pack;
 			pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
 			pack.WriteString(opc);
@@ -82,9 +131,9 @@ void Chat(std::vector<TcpSocket*>* _clientes)
 	}
 }
 
-void StartGame(std::vector<TcpSocket*>* _clientes)
+void ProtocolController()
 {
-	std::cout << "Se reparte la baraja" << std::endl;
+
 }
 
 void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpSocket* _socketBSS, bool* _exitBSS, bool * _continueBSS)
@@ -148,14 +197,12 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 
 					break;
 
-				case Protocol::BSS_PEERProtocol::PEERMESSAGE:
-					break;
-
 				case Protocol::BSS_PEERProtocol::PEERPLAYERLIST:
 
 					packet.Read(&sizeGamesPlayers);
 					packet.Read(&maxPlayers);
-
+					
+					player.idTurn = sizeGamesPlayers;
 					for (int i = 0; i < sizeGamesPlayers; i++)
 					{
 						port.ip = packet.ReadString();
@@ -214,7 +261,6 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 							_clientes->at(i)->Send(pack);
 						}
 						AskIfReady(_clientes);
-						StartGame(_clientes);
 					}
 					break;
 				case Protocol::BSS_PEERProtocol::EXITBSSCOM:
@@ -222,7 +268,6 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					strRec = packet.ReadString();
 					std::cout << strRec << std::endl;
 					*_exitBSS = true;
-					std::cout << strRec << std::endl;
 					_socketBSS->Disconnect();
 					delete _socketBSS;
 					
@@ -316,35 +361,38 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 							int tempInt;
 
 							packet.Read(&tempInt);
-
-							switch (static_cast<Protocol::PEER_PEERProtocol>(tempInt))
+							
+							if (static_cast<Protocol::PEER_PEERProtocol>(tempInt) == Protocol::PEER_PEERProtocol::ACKREADYFORGAME)
 							{
-							case Protocol::PEER_PEERProtocol::SENDMESSAGE:
-
-								strRec = packet.ReadString();
-								std::cout << "He recibido un mensaje: " << strRec << " del puerto " << client->GetRemotePort().port << std::endl;
-								break;
-
-							case Protocol::PEER_PEERProtocol::ACKREADYFORGAME:
-								AskIfReady(_clientes);
-								// Send message to all clients that the game has started
-								StartGame(_clientes);
-								break;
-
-							case Protocol::PEER_PEERProtocol::ISREADY:
-								gameReady.at(it) = true;
-								
-								std::cout << _clientes->at(it)->GetRemotePort().port << ": Player remote is ready" << std::endl;
-								break;
-
-							case Protocol::PEER_PEERProtocol::NONE:
-								std::cout << "Error de None" << std::endl;
-								break;
-
-							default:
-								std::cout << "Error de no encontrar tipo enum" << std::endl;
-								break;
+								std::thread tReadyToPlay(AskIfReady, _clientes);
+								tReadyToPlay.detach();
 							}
+							else
+							{
+								switch (static_cast<Protocol::PEER_PEERProtocol>(tempInt))
+								{
+								case Protocol::PEER_PEERProtocol::SENDMESSAGE:
+
+									strRec = packet.ReadString();
+									std::cout << client->GetRemotePort().port << ": " << strRec << std::endl;
+									break;
+
+								case Protocol::PEER_PEERProtocol::ISREADY:
+									gameReady.at(it) = true;
+									std::cout << _clientes->at(it)->GetRemotePort().port << ": Player remote is ready" << std::endl;
+									break;
+
+								case Protocol::PEER_PEERProtocol::NONE:
+									std::cout << "Error de None" << std::endl;
+									break;
+
+								default:
+									std::cout << "Error de no encontrar tipo enum" << std::endl;
+									break;
+								}
+							}
+
+							
 
 						}
 						else if (client->StatusReceived().GetStatus() == Status::EStatusType::DISCONNECTED)
@@ -448,8 +496,9 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 			// Random seed 
 			player.randomSeed = _localPort;
 			//std::cout << "My random seed is: " << player.randomSeed << std::endl;
-
 			pack.Write(_localPort);
+			
+			player.idTurn = 0;
 			
 			Status status = sock->Send(pack);
 			if (status.GetStatus() != Status::EStatusType::DONE)

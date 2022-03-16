@@ -7,9 +7,10 @@ class Player
 {
 public:
 	
-	// card games variables
 	unsigned int randomSeed;
-	
+	int idTurn;
+
+	// card games variables
 	std::vector<Card*> hand;
 	std::vector<std::vector<Card*>*> otherhands;
 
