@@ -15,7 +15,6 @@ public:
 
 	enum class PEER_PEERProtocol
 	{
-		SENDMESSAGE, NONE
+		SENDMESSAGE, ACKREADYFORGAME, ISREADY, NONE
 	};
-
 };

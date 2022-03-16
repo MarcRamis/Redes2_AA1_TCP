@@ -13,8 +13,7 @@ class Maze
 public:
 	std::stack<Card*> deck;
 	std::stack<Card*> discardDeck;
-	std::vector<Card*> playedCards;
-
+	
 	Maze();
 	std::vector<Card*> DealCards(unsigned int maxCardsToDeal);
 };

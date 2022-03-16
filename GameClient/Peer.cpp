@@ -3,6 +3,7 @@
 #include <Selector.h>
 #include "Protocol.h"
 #include "Constants.h"
+#include "Player.h"
 
 #include <vector>
 #include <thread>
@@ -12,12 +13,82 @@
 
 std::mutex mtxConexiones;
 unsigned int _localPort;
+Player player;
+std::vector<bool> gameReady;
+bool gameStart = false;
+bool isChat = true;
 
+void AskIfReady(std::vector<TcpSocket*>* _clientes)
+{
+	isChat = false;
+	std::cout << "Are you ready? 1 - Yes" << std::endl;
+	int ackReady;
+	do
+	{
+		std::cin >> ackReady;
+		if (ackReady != 1)
+		{
+			std::cout << "Are you ready? 1 - Yes" << std::endl;
+		}
+	} while (ackReady != 1);
+	
+	// Send the packet to every peer to know if is ready
+	for (int i = 0; i < _clientes->size(); i++)
+	{
+		OutputMemoryStream pack;
+		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::ISREADY));
+		_clientes->at(i)->Send(pack);
+	}
+	
+	while (!gameStart)
+	{
+		gameStart = true;
+		for (int i = 0; i < gameReady.size(); i++)
+		{
+			if (!gameReady.at(i)) {
+				gameStart = false;
+			}
+		}
+	}
+	isChat = true;
+}
+
+void Chat(std::vector<TcpSocket*>* _clientes)
+{
+	std::string opc;
+
+	while (opc != "exit")
+	{
+		if (isChat)
+		{
+			std::cout << "Write a message: " << std::endl;
+			//std::getline(std::cin, opc);
+			std::cin >> opc;
+
+			OutputMemoryStream pack;
+			pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
+			pack.WriteString(opc);
+
+			for (size_t i = 0; i < _clientes->size(); i++)
+			{
+				Status status = (_clientes->at(i))->Send(pack);
+				if (status.GetStatus() != Status::EStatusType::DONE)
+				{
+					std::cout << "El mensaje enviado Peer2Peer no se ha enviado: " << std::endl;
+				}
+			}
+		}
+
+	}
+}
+
+void StartGame(std::vector<TcpSocket*>* _clientes)
+{
+	std::cout << "Se reparte la baraja" << std::endl;
+}
 
 void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpSocket* _socketBSS, bool* _exitBSS, bool * _continueBSS)
 {
-	bool running = true;
-
 	// Endless loop that waits for new connections
 	while (!(*_exitBSS))
 	{
@@ -29,7 +100,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 		{
 			std::string strRec;
 			int tempInt;
-
+			
 			//Games List variables
 			int sizeGamesList;
 			std::string serverName;
@@ -83,6 +154,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 				case Protocol::BSS_PEERProtocol::PEERPLAYERLIST:
 
 					packet.Read(&sizeGamesPlayers);
+					packet.Read(&maxPlayers);
 
 					for (int i = 0; i < sizeGamesPlayers; i++)
 					{
@@ -97,6 +169,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 						case Status::EStatusType::DONE:
 							
 							_clientes->push_back(tempSock);
+							gameReady.push_back(false);
 							_selector->Add(tempSock);
 							std::cout << "Se pudo conectar a " << port.ip << " con puerto " << port.port << std::endl;
 							
@@ -123,9 +196,26 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					{
 						_socketBSS->Disconnect();
 						delete _socketBSS;
-						*_exitBSS = true;
+						*_exitBSS = true; //Empezar el chat del main
+						
+						// Random seed 
+						player.randomSeed = _clientes->at(0)->GetRemotePort().port;;
+						//std::cout << "My random seed is: " << player.randomSeed << std::endl;
 					}
 
+					// Look if the match is full
+					packet.Read(&sizeGamesPlayers);
+					if (sizeGamesPlayers == maxPlayers)
+					{
+						OutputMemoryStream pack;
+						for (int i = 0; i < _clientes->size(); i++)
+						{
+							pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::ACKREADYFORGAME));
+							_clientes->at(i)->Send(pack);
+						}
+						AskIfReady(_clientes);
+						StartGame(_clientes);
+					}
 					break;
 				case Protocol::BSS_PEERProtocol::EXITBSSCOM:
 
@@ -191,6 +281,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 					// Add the new client to the clients list
 					std::cout << "Llega el cliente con puerto: " << client->GetRemotePort().port << std::endl;
 					_clientes->push_back(client);
+					gameReady.push_back(false);
 					// Add the new client to the selector so that we will
 					// be notified when he sends something
 					_selector->Add(client);
@@ -219,7 +310,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 						// The client has sent some data, we can receive it
 						InputMemoryStream packet = *client->Receive();
 
-						if (status.GetStatus() == Status::EStatusType::DONE)
+						if (client->StatusReceived().GetStatus() == Status::EStatusType::DONE)
 						{
 							std::string strRec;
 							int tempInt;
@@ -234,6 +325,18 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 								std::cout << "He recibido un mensaje: " << strRec << " del puerto " << client->GetRemotePort().port << std::endl;
 								break;
 
+							case Protocol::PEER_PEERProtocol::ACKREADYFORGAME:
+								AskIfReady(_clientes);
+								// Send message to all clients that the game has started
+								StartGame(_clientes);
+								break;
+
+							case Protocol::PEER_PEERProtocol::ISREADY:
+								gameReady.at(it) = true;
+								
+								std::cout << _clientes->at(it)->GetRemotePort().port << ": Player remote is ready" << std::endl;
+								break;
+
 							case Protocol::PEER_PEERProtocol::NONE:
 								std::cout << "Error de None" << std::endl;
 								break;
@@ -244,7 +347,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 							}
 
 						}
-						else if (status.GetStatus() == Status::EStatusType::DISCONNECTED)
+						else if (client->StatusReceived().GetStatus() == Status::EStatusType::DISCONNECTED)
 						{
 							_clientes->erase(_clientes->begin() + it);
 							_selector->Remove(client);
@@ -343,9 +446,8 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 			}
 
 			// Random seed 
-			unsigned int randomSeed = unsigned int(time(NULL));
-			srand(randomSeed);
-			pack.Write(randomSeed);
+			player.randomSeed = _localPort;
+			//std::cout << "My random seed is: " << player.randomSeed << std::endl;
 
 			pack.Write(_localPort);
 			
@@ -372,7 +474,6 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 			std::cout << "Write game name to join: " << std::endl;
 			std::cin >> opc;
 			pack.WriteString(opc);
-			
 
 			Status status = sock->Send(pack);
 			if (status.GetStatus() != Status::EStatusType::DONE)
@@ -389,40 +490,18 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 
 int main()
 {
-	unsigned int localPort = 50000;
-
 	std::vector<TcpSocket*> clientes;
 	Selector selector;
 	TcpListener listener;
-
-	std::string opc;
 
 	bool exitBSS = false;
 	bool continueBSS = false;
 
 	ConnectToBSS(&clientes, &selector, &exitBSS, &continueBSS);
-
 	std::thread tAccepts(ControlPeers, &clientes, &selector, &listener, &exitBSS, &continueBSS);
 	tAccepts.detach();
 
-	while (opc != "e")
-	{
-		std::cout << "Write a message: " << std::endl;
-		std::getline(std::cin, opc);
-
-		OutputMemoryStream pack;
-		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
-		pack.WriteString(opc);
-
-		for (size_t i = 0; i < clientes.size(); i++)
-		{
-			Status status = (clientes.at(i))->Send(pack);
-			if (status.GetStatus() != Status::EStatusType::DONE)
-			{
-				std::cout << "El mensaje enviado Peer2Peer no se ha enviado: " << std::endl;
-			}
-		}
-	} 
-
+	Chat(&clientes);
+	
 	return 0;
 }

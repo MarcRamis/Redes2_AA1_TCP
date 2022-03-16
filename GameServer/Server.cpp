@@ -75,7 +75,6 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 							bool thereIsPassword = false;
 							
 							OutputMemoryStream sendPacket;
-
 							switch (static_cast<Protocol::PEER_BSSProtocol>(type))
 							{
 							case Protocol::PEER_BSSProtocol::CREATEMATCH:
@@ -155,21 +154,27 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 									{
 										sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::PEERPLAYERLIST));
 										sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
+										sendPacket.Write(static_cast<int>(games->at(i).maxPlayers));
+																
 										for (size_t j = 0; j < games->at(i).ports.size(); j++)
 										{ 
 											sendPacket.WriteString(games->at(i).ports.at(j).ip);
 											sendPacket.Write(games->at(i).ports.at(j).port);
 										}
-										client->Send(sendPacket);
 										
 										tmpPort.ip = client->GetRemoteIP();
 										tmpPort.port = client->GetRemotePort().port;
 										games->at(i).ports.push_back(tmpPort);
 										foundGame = true;
+
+										sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
+										client->Send(sendPacket);
+
 										if (games->at(i).ports.size() >= games->at(i).maxPlayers)  //Comrpueba si la sala esta llena
 										{
 											games->erase(games->find(i));
 										}
+
 										break;
 									}
 								}
