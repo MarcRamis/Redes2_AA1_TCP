@@ -1,5 +1,11 @@
 #include "Maze.h"
 
+#include "Organ.h"
+#include "Virus.h"
+#include "Medicine.h"
+#include "Treatment.h"
+
+
 Maze::Maze()
 {
 	std::vector<Card*> tmpDeck;

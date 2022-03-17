@@ -12,6 +12,7 @@ public:
 	// Choosing variables
 	std::string name;
 	std::string pw;
+	bool hasPassword;
 	
 	int maxPlayers; // (2-4)
 	std::vector<Port> ports;

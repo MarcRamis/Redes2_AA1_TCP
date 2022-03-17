@@ -22,6 +22,7 @@ Player player;
 std::vector<bool> gameReady;
 bool gameStart = false;
 bool isChat = false;
+std::string gameName;
 
 void StartGame(std::vector<TcpSocket*>* _clientes)
 {
@@ -33,9 +34,11 @@ void StartGame(std::vector<TcpSocket*>* _clientes)
 	
 	player.maze = new Maze();
 	
+	std::cout << "I am player number: " << player.idTurn + 1 << std::endl;
+	
 	for (int i = 0; i < _clientes->size() + 1; i++)
 	{
-		std::cout << i << "  ";
+		std::cout << i + 1 << "  ";
 		if (i == player.idTurn)
 		{
 			//std::cout << "My cards: " << std::endl;
@@ -63,6 +66,31 @@ void StartGame(std::vector<TcpSocket*>* _clientes)
 		}
 	}
 }
+
+void JoinGame(TcpSocket *client)
+{
+	OutputMemoryStream pack;
+	pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::JOINMATCH));
+	pack.WriteString(gameName);
+	Status status = client->Send(pack);
+}
+
+void AskCorrectPassword(std::string correctPassword, TcpSocket* client)
+{
+	std::string txtPassword = " ";
+	while (txtPassword != correctPassword)
+	{
+		std::cout << "Write the correct password: " << std::endl;
+		std::cin >> txtPassword;
+		if (txtPassword == "exit")
+		{
+			exit(0);
+		}
+	}
+
+	JoinGame(client);
+}
+
 
 void AskIfReady(std::vector<TcpSocket*>* _clientes)
 {
@@ -156,6 +184,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 			int maxPlayers;
 			int currentPlayers;
 			bool hasPassWord;
+			std::string password;
 
 			//Join Game variables
 			int sizeGamesPlayers;
@@ -195,6 +224,13 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					std::cout << strRec << std::endl;
 					*_continueBSS = false;
 
+					break;
+
+				case Protocol::BSS_PEERProtocol::WRITEPASSWORD:
+					
+					password = packet.ReadString();
+					AskCorrectPassword(password, _socketBSS);
+					
 					break;
 
 				case Protocol::BSS_PEERProtocol::PEERPLAYERLIST:
@@ -273,6 +309,12 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					
 					break;
 				
+				case Protocol::BSS_PEERProtocol::NOPASSWORD:
+					
+					JoinGame(_socketBSS);
+
+					break;
+
 				case Protocol::BSS_PEERProtocol::NONE:
 					break;
 				default:
@@ -518,11 +560,11 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 		}
 		else if (opc == "3")
 		{
-			pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::JOINMATCH));
+			pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::ACKPASSWORD));
 			
 			std::cout << "Write game name to join: " << std::endl;
-			std::cin >> opc;
-			pack.WriteString(opc);
+			std::cin >> gameName;
+			pack.WriteString(gameName);
 
 			Status status = sock->Send(pack);
 			if (status.GetStatus() != Status::EStatusType::DONE)
@@ -534,7 +576,7 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 		*_continueBSS = true;
 
 	} while (!(*_exitBSS));
-	std::cout << "Salgo del BSS" << std::endl;
+	//std::cout << "Salgo del BSS" << std::endl;
 }
 
 int main()

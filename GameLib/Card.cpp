@@ -4,6 +4,18 @@ void Card::Draw()
 {
 }
 
+void Card::ImmunizeOrgan()
+{
+}
+
+void Card::VacunateOrgan()
+{
+}
+
+void Card::InfectateOrgan()
+{
+}
+
 Card::Card()
 {
 }

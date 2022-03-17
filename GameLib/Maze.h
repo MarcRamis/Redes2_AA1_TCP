@@ -8,6 +8,11 @@
 #include "Card.h"
 #include "Constants.h"
 
+class Organ;
+class Medicine;
+class Virus;
+class Treatment;
+
 class Maze
 {
 public:

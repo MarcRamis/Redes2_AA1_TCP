@@ -63,6 +63,18 @@
     <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Organ.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Virus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Medicine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Treatment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TcpSocket.cpp">
@@ -93,6 +105,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Organ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Virus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Medicine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Treatment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

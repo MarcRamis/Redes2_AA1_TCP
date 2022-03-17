@@ -3,6 +3,7 @@
 #include "Selector.h"
 #include "Match.h"
 #include "Protocol.h"
+#include "Constants.h"
 
 #include <vector>
 #include <map>
@@ -14,12 +15,65 @@
 std::mutex mtxConexiones;
 int currentMatchKeys;
 
+void JoinGame(Match tempGame, std::map<int, Match>* games, TcpSocket* client, std::vector <TcpSocket*>* _clientes, Selector selector, int it)
+{
+	OutputMemoryStream sendPacket;
+	Port tmpPort;
+	bool foundGame = false;
+
+	for (size_t i = 0; i < games->size(); i++)
+	{
+		if (games->at(i).name == tempGame.name)
+		{
+			sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::PEERPLAYERLIST));
+			sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
+			sendPacket.Write(static_cast<int>(games->at(i).maxPlayers));
+
+			for (size_t j = 0; j < games->at(i).ports.size(); j++)
+			{
+				sendPacket.WriteString(games->at(i).ports.at(j).ip);
+				sendPacket.Write(games->at(i).ports.at(j).port);
+			}
+
+			tmpPort.ip = client->GetRemoteIP();
+			tmpPort.port = client->GetRemotePort().port;
+			games->at(i).ports.push_back(tmpPort);
+			foundGame = true;
+
+			sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
+			client->Send(sendPacket);
+
+			if (games->at(i).ports.size() >= games->at(i).maxPlayers)  //Comrpueba si la sala esta llena
+			{
+				games->erase(games->find(i));
+			}
+			break;
+		}
+		if (!foundGame)
+		{
+			std::string errorTxt = "Game could't be found";
+
+			sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::ERROR));
+			sendPacket.WriteString(errorTxt);
+			client->Send(sendPacket);
+		}
+		else
+		{
+			_clientes->erase(_clientes->begin() + it);
+			selector.Remove(client);
+			client->Disconnect();
+			delete client;
+			it--;
+		}
+	}
+}
+
 void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* games)
 {
 	bool running = true;
 
 	TcpListener listener;
-	Status status = listener.Listen(50000);
+	Status status = listener.Listen(PORT);
 	if (status.GetStatus() != Status::EStatusType::DONE)
 	{
 		std::cout << "Error al abrir listener\n";
@@ -28,7 +82,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 
 	Selector selector;
 	selector.Add(&listener);
-
+	
 	while (true)
 	{
 		std::cout << "Waiting connection" << std::endl;
@@ -63,7 +117,6 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 						{
 							std::cout << "Recibido mensaje de Peer" << std::endl;
 
-							std::string strRec;
 							int type;
 							packet.Read(&type);
 							
@@ -72,7 +125,6 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 
 							bool nameRepeats = false;
 							bool foundGame = false;
-							bool thereIsPassword = false;
 							
 							OutputMemoryStream sendPacket;
 							switch (static_cast<Protocol::PEER_BSSProtocol>(type))
@@ -104,9 +156,8 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 									tmpPort.port = client->GetRemotePort().port;
 									tempGame.ports.push_back(tmpPort);
 									
-									packet.Read(&thereIsPassword);
-									
-									if (thereIsPassword)
+									packet.Read(&tempGame.hasPassword);
+									if (tempGame.hasPassword)
 									{
 										tempGame.pw = packet.ReadString();
 									}
@@ -139,62 +190,38 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 									sendPacket.WriteString(games->at(i).name);
 									sendPacket.Write(games->at(i).maxPlayers);
 									sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
-									sendPacket.Write(thereIsPassword);
+									sendPacket.Write(games->at(i).hasPassword);
 								}
 								client->Send(sendPacket);
 								break;
 
-							case Protocol::PEER_BSSProtocol::JOINMATCH:
+							case Protocol::PEER_BSSProtocol::ACKPASSWORD:
 								
-								strRec = packet.ReadString();
-
+								tempGame.name = packet.ReadString();
 								for (size_t i = 0; i < games->size(); i++)
 								{
-									if (games->at(i).name == strRec)
+									if (games->at(i).name == tempGame.name)
 									{
-										sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::PEERPLAYERLIST));
-										sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
-										sendPacket.Write(static_cast<int>(games->at(i).maxPlayers));
-																
-										for (size_t j = 0; j < games->at(i).ports.size(); j++)
-										{ 
-											sendPacket.WriteString(games->at(i).ports.at(j).ip);
-											sendPacket.Write(games->at(i).ports.at(j).port);
-										}
-										
-										tmpPort.ip = client->GetRemoteIP();
-										tmpPort.port = client->GetRemotePort().port;
-										games->at(i).ports.push_back(tmpPort);
-										foundGame = true;
-
-										sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
-										client->Send(sendPacket);
-
-										if (games->at(i).ports.size() >= games->at(i).maxPlayers)  //Comrpueba si la sala esta llena
+										// To make the current client to join match know if there is password										
+										if (games->at(i).hasPassword)
 										{
-											games->erase(games->find(i));
+											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::WRITEPASSWORD));
+											sendPacket.WriteString(games->at(i).pw);
+											client->Send(sendPacket);
 										}
-
+										else
+										{
+											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::NOPASSWORD));
+											client->Send(sendPacket);
+										}
 										break;
 									}
 								}
-
-								if (foundGame)
-								{
-									_clientes->erase(_clientes->begin() + it);
-									selector.Remove(client);
-									client->Disconnect();
-									delete client;
-									it--;
-								}
-								else
-								{
-									std::string errorTxt = "Game could't be found";
-
-									sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::ERROR));
-									sendPacket.WriteString(errorTxt);
-									client->Send(sendPacket);
-								}
+								break;
+							case Protocol::PEER_BSSProtocol::JOINMATCH:
+								
+								tempGame.name = packet.ReadString();
+								JoinGame(tempGame, games, client, _clientes,selector, it);
 
 								break;
 								
@@ -231,7 +258,6 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 
 	listener.Disconnect();
 }
-
 
 int main()
 {
