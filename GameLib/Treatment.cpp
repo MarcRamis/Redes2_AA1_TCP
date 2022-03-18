@@ -4,7 +4,7 @@ Treatment::Treatment()
 {
 }
 
-Treatment::Treatment(ETreatmentType _type) : type(_type) {};
+Treatment::Treatment(ETreatmentType _type) : type(_type) { cardType = EType::TREATMENT; };
 
 void Treatment::Draw()
 {

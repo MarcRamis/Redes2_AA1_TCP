@@ -4,7 +4,7 @@ Organ::Organ()
 {
 }
 
-Organ::Organ(EOrganType _type) : type(_type) {};
+Organ::Organ(EOrganType _type) : type(_type) { cardType = EType::ORGAN; };
 
 void Organ::Draw()
 {

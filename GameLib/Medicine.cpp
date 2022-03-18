@@ -4,7 +4,7 @@ Medicine::Medicine()
 {
 }
 
-Medicine::Medicine(EMedicineType _type) : type(_type) {}
+Medicine::Medicine(EMedicineType _type) : type(_type) { cardType = EType::MEDICINE; }
 
 void Medicine::Draw()
 {

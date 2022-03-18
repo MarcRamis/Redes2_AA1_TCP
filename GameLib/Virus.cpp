@@ -4,7 +4,7 @@ Virus::Virus()
 {
 }
 
-Virus::Virus(EVirusType _type) : type(_type) {}
+Virus::Virus(EVirusType _type) : type(_type) { cardType = EType::VIRUS; }
 
 void Virus::Draw()
 {

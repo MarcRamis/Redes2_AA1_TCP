@@ -5,7 +5,7 @@ class Organ : public Card
 public:
 	enum class EOrganType { JOKER, HEART, STOMACH, BRAIN, BONE };
 	EOrganType type;
-
+	
 	enum class EOrganState { NONE, IMMUNIZED, VACUNATED, INFECTED };
 	EOrganState state = EOrganState::NONE;
 
