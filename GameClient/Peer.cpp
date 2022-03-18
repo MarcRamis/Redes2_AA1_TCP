@@ -3,7 +3,7 @@
 #include <Selector.h>
 #include "Protocol.h"
 #include "Constants.h"
-#include "Player.h"
+#include "Game.h"
 #include "ConsoleControl.h"
 
 #include <vector>
@@ -14,58 +14,16 @@
 
 std::mutex mtxConexiones;
 
-// Player variables
-unsigned short _localPort;
+// Game variables
+Game game;
 Player player;
 
-// Protocol variables
+// Befor game variables
+unsigned short _localPort;
 std::vector<bool> gameReady;
 bool gameStart = false;
 bool isChat = false;
 std::string gameName;
-
-void StartGame(std::vector<TcpSocket*>* _clientes)
-{
-	ConsoleClear();
-	std::cout << "DEALING CARDS" << std::endl;
-	ConsoleWait(2000.f);
-	
-	srand(player.randomSeed);
-	
-	player.maze = new Maze();
-	
-	std::cout << "I am player number: " << player.idTurn + 1 << std::endl;
-	
-	for (int i = 0; i < _clientes->size() + 1; i++)
-	{
-		std::cout << i + 1 << "  ";
-		if (i == player.idTurn)
-		{
-			//std::cout << "My cards: " << std::endl;
-			player.hand = player.maze->DealCards(CARDS_TO_DEAL);
-			for (Card* c : player.hand)
-			{
-				c->Draw();
-			}
-			std::cout << std::endl;
-		}
-		else
-		{
-			std::vector<Card*> cards = player.maze->DealCards(CARDS_TO_DEAL);
-			player.otherhands.push_back(&cards);
-
-			//std::cout << "Other player cards: " << std::endl;
-			for (auto c : player.otherhands)
-			{
-				for (auto c2 : *c)
-				{
-					c2->Draw();
-				}
-			}
-			std::cout << std::endl;
-		}
-	}
-}
 
 void JoinGame(TcpSocket *client)
 {
@@ -75,22 +33,18 @@ void JoinGame(TcpSocket *client)
 	Status status = client->Send(pack);
 }
 
-void AskCorrectPassword(std::string correctPassword, TcpSocket* client)
+void AckPassword(TcpSocket* client)
 {
 	std::string txtPassword = " ";
-	while (txtPassword != correctPassword)
-	{
-		std::cout << "Write the correct password: " << std::endl;
-		std::cin >> txtPassword;
-		if (txtPassword == "exit")
-		{
-			exit(0);
-		}
-	}
+	std::cout << "Write the correct password: " << std::endl;
+	std::cin >> txtPassword;
 
-	JoinGame(client);
+	OutputMemoryStream pack;
+	pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::ACK_PWD));
+	pack.WriteString(gameName);
+	pack.WriteString(txtPassword);
+	Status status = client->Send(pack)
 }
-
 
 void AskIfReady(std::vector<TcpSocket*>* _clientes)
 {
@@ -128,7 +82,7 @@ void AskIfReady(std::vector<TcpSocket*>* _clientes)
 		}
 	}
 	isChat = true;
-	StartGame(_clientes);
+	game.StartGame(_clientes,player);
 }
 
 void Chat(std::vector<TcpSocket*>* _clientes)
@@ -225,11 +179,10 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					*_continueBSS = false;
 
 					break;
-
-				case Protocol::BSS_PEERProtocol::WRITEPASSWORD:
 					
-					password = packet.ReadString();
-					AskCorrectPassword(password, _socketBSS);
+				case Protocol::BSS_PEERProtocol::REQ_PWD:
+	
+					AckPassword(_socketBSS);
 					
 					break;
 
@@ -307,12 +260,6 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					_socketBSS->Disconnect();
 					delete _socketBSS;
 					
-					break;
-				
-				case Protocol::BSS_PEERProtocol::NOPASSWORD:
-					
-					JoinGame(_socketBSS);
-
 					break;
 
 				case Protocol::BSS_PEERProtocol::NONE:
@@ -560,7 +507,7 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 		}
 		else if (opc == "3")
 		{
-			pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::ACKPASSWORD));
+			pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::JOINMATCH));
 			
 			std::cout << "Write game name to join: " << std::endl;
 			std::cin >> gameName;

@@ -194,8 +194,8 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 								}
 								client->Send(sendPacket);
 								break;
-
-							case Protocol::PEER_BSSProtocol::ACKPASSWORD:
+								
+							case Protocol::PEER_BSSProtocol::JOINMATCH:
 								
 								tempGame.name = packet.ReadString();
 								for (size_t i = 0; i < games->size(); i++)
@@ -205,23 +205,38 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 										// To make the current client to join match know if there is password										
 										if (games->at(i).hasPassword)
 										{
-											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::WRITEPASSWORD));
-											sendPacket.WriteString(games->at(i).pw);
+											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::REQ_PWD));
 											client->Send(sendPacket);
 										}
 										else
 										{
-											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::NOPASSWORD));
-											client->Send(sendPacket);
+											JoinGame(tempGame, games, client, _clientes, selector, it);
 										}
 										break;
 									}
 								}
 								break;
-							case Protocol::PEER_BSSProtocol::JOINMATCH:
-								
+							case Protocol::PEER_BSSProtocol::ACK_PWD:
+
 								tempGame.name = packet.ReadString();
-								JoinGame(tempGame, games, client, _clientes,selector, it);
+								tempGame.pw = packet.ReadString();
+								for (size_t i = 0; i < games->size(); i++)
+								{
+									if (games->at(i).name == tempGame.name)
+									{
+										// To make the current client to join match know if there is password										
+										if (games->at(i).pw != tempGame.pw)
+										{
+											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::REQ_PWD));
+											client->Send(sendPacket);
+										}
+										else
+										{
+											JoinGame(tempGame, games, client, _clientes, selector, it);
+										}
+										break;
+									}
+								}
 
 								break;
 								

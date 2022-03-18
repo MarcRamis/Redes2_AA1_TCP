@@ -14,7 +14,6 @@ public:
 
 	void Draw();
 	
-
 	void ImmunizeOrgan();
 	void VacunateOrgan();
 	void InfectateOrgan();

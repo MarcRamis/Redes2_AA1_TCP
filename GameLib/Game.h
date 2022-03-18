@@ -1,18 +1,14 @@
+#pragma once
+
 #include <vector>
-#include "Maze.h"
+#include "TcpSocket.h"
 #include "Player.h"
-#include "Constants.h"
-#include "ConsoleControl.h"
 
 class Game
 {
 
 public:
-	Maze* maze;
-	std::vector<Player*> players;
 
-	Game();
-
-	void Update();
-	void Draw();
+	void StartGame(std::vector<TcpSocket*>* _clientes, Player player);
+	void LoopGame(std::vector<TcpSocket*>* _clientes, Player player);
 };
