@@ -8,8 +8,11 @@ class Player
 public:
 	
 	unsigned int randomSeed;
+	
+	// game turn
 	int idTurn;
-
+	std::vector<int> idOtherTurns;
+	
 	// card games variables
 	std::vector<Card*> hand;
 	std::vector<std::vector<Card*>*> otherhands;

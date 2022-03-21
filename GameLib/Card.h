@@ -9,7 +9,7 @@ public:
 	
 	enum class EType { NONE, ORGAN, MEDICINE, VIRUS, TREATMENT };
 	EType cardType;
-
+	
 	Card();
 	~Card();
 	
