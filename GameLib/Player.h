@@ -15,10 +15,10 @@ public:
 	
 	// card games variables
 	std::vector<Card*> hand;
-	std::vector<std::vector<Card*>*> otherhands;
-
+	std::vector<std::vector<Card*>> otherhands;
+	
 	std::vector<Card*> playedCards;
-	std::vector<std::vector<Card*>*> otherPlayedCards;
+	std::vector<std::vector<Card*>> otherPlayedCards;
 	
 	Maze* maze;
 
