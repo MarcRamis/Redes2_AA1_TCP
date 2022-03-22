@@ -13,14 +13,59 @@
 #include <list>
 
 std::mutex mtxConexiones;
-int currentMatchKeys;
 
-void JoinGame(Match tempGame, std::map<int, Match>* games, TcpSocket* client, std::vector <TcpSocket*>* _clientes, Selector selector, int it)
+void JoinGame(Match tempGame, std::map<std::string, Match>* games, TcpSocket* client, std::vector <TcpSocket*>* _clientes, Selector selector, int it)
 {
 	OutputMemoryStream sendPacket;
 	Port tmpPort;
 	bool foundGame = false;
 
+	for (auto game = games->begin(); game != games->end(); ++game)
+	{
+		if (game->second.name == tempGame.name)
+		{
+			sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::PEERPLAYERLIST));
+			sendPacket.Write(static_cast<int>(game->second.ports.size()));
+			sendPacket.Write(static_cast<int>(game->second.maxPlayers));
+			
+			for (size_t j = 0; j < game->second.ports.size(); j++)
+			{
+				sendPacket.WriteString(game->second.ports.at(j).ip);
+				sendPacket.Write(game->second.ports.at(j).port);
+			}
+			tmpPort.ip = client->GetRemoteIP();
+			tmpPort.port = client->GetRemotePort().port;
+			game->second.ports.push_back(tmpPort);
+			foundGame = true;
+
+			sendPacket.Write(static_cast<int>(game->second.ports.size()));
+			client->Send(sendPacket);
+
+			if (game->second.ports.size() >= game->second.maxPlayers)
+			{
+				games->erase(game);
+			}
+			break;
+		}
+		if (!foundGame)
+		{
+			std::string errorTxt = "Game could't be found";
+
+			sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::ERROR));
+			sendPacket.WriteString(errorTxt);
+			client->Send(sendPacket);
+		}
+		else
+		{
+			_clientes->erase(_clientes->begin() + it);
+			selector.Remove(client);
+			client->Disconnect();
+			delete client;
+			it--;
+		}
+	}
+
+	/*
 	for (size_t i = 0; i < games->size(); i++)
 	{
 		if (games->at(i).name == tempGame.name)
@@ -66,9 +111,10 @@ void JoinGame(Match tempGame, std::map<int, Match>* games, TcpSocket* client, st
 			it--;
 		}
 	}
+	*/
 }
 
-void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* games)
+void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<std::string,Match>* games)
 {
 	bool running = true;
 
@@ -135,9 +181,9 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 
 								tempGame.name = packet.ReadString(); // Save game name
 								
-								for (size_t i = 0; i < games->size(); i++)
+								for (auto game = games->begin(); game != games->end(); ++game)
 								{
-									if (games->at(i).name == tempGame.name)
+									if (game->second.name == tempGame.name)
 									{
 										std::string textError = "Game name exists";
 										sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::ERROR));
@@ -164,8 +210,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 									
 									std::string textDebug = "The game was created";
 									std::cout << textDebug << std::endl;
-									games->insert(std::pair<int,Match>(currentMatchKeys, tempGame));
-									currentMatchKeys++;
+									games->insert(std::pair<std::string,Match>(tempGame.name, tempGame));
 
 									sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::EXITBSSCOM));
 									sendPacket.WriteString(textDebug);
@@ -185,12 +230,12 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 								
 								sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::MATCHLIST));
 								sendPacket.Write(static_cast<int>(games->size()));
-								for (size_t i = 0; i < games->size(); i++)
+								for (auto game = games->begin(); game != games->end(); ++game)
 								{
-									sendPacket.WriteString(games->at(i).name);
-									sendPacket.Write(games->at(i).maxPlayers);
-									sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
-									sendPacket.Write(games->at(i).hasPassword);
+									sendPacket.WriteString(game->second.name);
+									sendPacket.Write(game->second.maxPlayers);
+									sendPacket.Write(static_cast<int>(game->second.ports.size()));
+									sendPacket.Write(game->second.hasPassword);
 								}
 								client->Send(sendPacket);
 								break;
@@ -198,12 +243,12 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 							case Protocol::PEER_BSSProtocol::JOINMATCH:
 								
 								tempGame.name = packet.ReadString();
-								for (size_t i = 0; i < games->size(); i++)
+								for (auto game = games->begin(); game != games->end(); ++game)
 								{
-									if (games->at(i).name == tempGame.name)
+									if (game->second.name == tempGame.name)
 									{
 										// To make the current client to join match know if there is password										
-										if (games->at(i).hasPassword)
+										if (game->second.hasPassword)
 										{
 											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::REQ_PWD));
 											client->Send(sendPacket);
@@ -220,12 +265,12 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<int,Match>* ga
 
 								tempGame.name = packet.ReadString();
 								tempGame.pw = packet.ReadString();
-								for (size_t i = 0; i < games->size(); i++)
+								for (auto game = games->begin(); game != games->end(); ++game)
 								{
-									if (games->at(i).name == tempGame.name)
+									if (game->second.name == tempGame.name)
 									{
 										// To make the current client to join match know if there is password										
-										if (games->at(i).pw != tempGame.pw)
+										if (game->second.pw != tempGame.pw)
 										{
 											sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::REQ_PWD));
 											client->Send(sendPacket);
@@ -278,7 +323,7 @@ int main()
 {
 	std::vector<Port*> ids;
 	std::vector<TcpSocket*> clientes;
-	std::map<int, Match> games;
+	std::map<std::string, Match> games;
 	
 	ControlServidor(&clientes, &games);
 
