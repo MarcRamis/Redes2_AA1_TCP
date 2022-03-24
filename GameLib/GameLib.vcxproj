@@ -172,6 +172,7 @@
     <ClCompile Include="Medicine.cpp" />
     <ClCompile Include="Organ.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Protocol.cpp" />
     <ClCompile Include="Selector.cpp" />
     <ClCompile Include="Status.cpp" />
     <ClCompile Include="TcpListener.cpp" />

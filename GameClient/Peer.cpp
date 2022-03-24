@@ -177,11 +177,11 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					strRec = packet.ReadString(); // recibo mensaje de errror
 					std::cout << strRec << std::endl;
 					*_continueBSS = false;
-
+					
 					break;
 					
 				case Protocol::BSS_PEERProtocol::REQ_PWD:
-	
+
 					AckPassword(_socketBSS);
 					
 					break;

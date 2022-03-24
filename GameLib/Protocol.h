@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Selector.h"
+#include <string>
+
 class Protocol
 {
 public:
@@ -17,4 +20,6 @@ public:
 	{
 		SENDMESSAGE, ACKREADYFORGAME, ISREADY, NONE
 	};
+
+	static void AckPassword(TcpSocket* client, std::string gameName);
 };
