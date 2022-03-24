@@ -81,7 +81,7 @@ void AskIfReady(std::vector<TcpSocket*>* _clientes)
 			}
 		}
 	}
-	game.StartGame(_clientes,player);
+	game.StartGame(_clientes, player);
 	isChat = true;
 }
 

@@ -1,6 +1,6 @@
 #include "Game.h"
 
-void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player player)
+void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player &player)
 {
 	for (int i = 0; i < _clientes->size() + 1; i++)
 	{
@@ -13,7 +13,7 @@ void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player player)
 	}
 }
 
-void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player player)
+void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player &player)
 {
 	std::cout << "I am player number: " << player.idTurn + 1 << std::endl << std::endl;
 	for (int i = 0; i < _clientes->size() + 1; i++)
@@ -43,7 +43,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player player)
 	}
 }
 
-void Game::SetTurn(std::vector<TcpSocket*>* _clientes, Player player)
+void Game::SetTurn(std::vector<TcpSocket*>* _clientes, Player &player)
 {
 	int myAmmount = 0;
 	std::vector<int> otherAmmountOrgans(_clientes->size());
@@ -98,7 +98,7 @@ void Game::SetTurn(std::vector<TcpSocket*>* _clientes, Player player)
 	}
 }
 
-void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player player)
+void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player &player)
 {
 	ConsoleClear();
 	std::cout << "DEALING CARDS" << std::endl << std::endl;
