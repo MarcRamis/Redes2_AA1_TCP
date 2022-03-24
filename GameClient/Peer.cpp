@@ -21,8 +21,6 @@ Player player;
 // Befor game variables
 unsigned short _localPort;
 std::vector<bool> gameReady;
-bool gameStart = false;
-bool isChat = false;
 std::string gameName;
 
 void JoinGame(TcpSocket *client)
@@ -71,51 +69,18 @@ void AskIfReady(std::vector<TcpSocket*>* _clientes)
 		}
 	}
 	
-	while (!gameStart)
+	while (!game.gameStart)
 	{
-		gameStart = true;
+		game.gameStart = true;
 		for (int i = 0; i < gameReady.size(); i++)
 		{
 			if (!gameReady.at(i)) {
-				gameStart = false;
+				game.gameStart = false;
 			}
 		}
 	}
 	game.StartGame(_clientes, player);
-	isChat = true;
-}
-
-void Chat(std::vector<TcpSocket*>* _clientes)
-{
-	std::string opc;
-
-	while (opc != "exit")
-	{
-		if (isChat)
-		{
-			std::cout << "Write a message: " << std::endl;
-			std::getline(std::cin, opc);
-			
-			OutputMemoryStream pack;
-			pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
-			pack.WriteString(opc);
-
-			for (size_t i = 0; i < _clientes->size(); i++)
-			{
-				Status status = (_clientes->at(i))->Send(pack);
-				if (status.GetStatus() != Status::EStatusType::DONE)
-				{
-					std::cout << "El mensaje enviado Peer2Peer no se ha enviado: " << std::endl;
-				}
-			}
-		}
-
-	}
-}
-
-void ProtocolController()
-{
-
+	//game.canChat = true;
 }
 
 void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpSocket* _socketBSS, bool* _exitBSS, bool * _continueBSS)
@@ -539,7 +504,7 @@ int main()
 	std::thread tAccepts(ControlPeers, &clientes, &selector, &listener, &exitBSS, &continueBSS);
 	tAccepts.detach();
 
-	Chat(&clientes);
+	Protocol::Chat(&clientes, game.canChat);
 	
 	return 0;
 }

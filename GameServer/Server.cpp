@@ -64,54 +64,6 @@ void JoinGame(Match tempGame, std::map<std::string, Match>* games, TcpSocket* cl
 			it--;
 		}
 	}
-
-	/*
-	for (size_t i = 0; i < games->size(); i++)
-	{
-		if (games->at(i).name == tempGame.name)
-		{
-			sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::PEERPLAYERLIST));
-			sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
-			sendPacket.Write(static_cast<int>(games->at(i).maxPlayers));
-
-			for (size_t j = 0; j < games->at(i).ports.size(); j++)
-			{
-				sendPacket.WriteString(games->at(i).ports.at(j).ip);
-				sendPacket.Write(games->at(i).ports.at(j).port);
-			}
-
-			tmpPort.ip = client->GetRemoteIP();
-			tmpPort.port = client->GetRemotePort().port;
-			games->at(i).ports.push_back(tmpPort);
-			foundGame = true;
-
-			sendPacket.Write(static_cast<int>(games->at(i).ports.size()));
-			client->Send(sendPacket);
-
-			if (games->at(i).ports.size() >= games->at(i).maxPlayers)  //Comrpueba si la sala esta llena
-			{
-				games->erase(games->find(i));
-			}
-			break;
-		}
-		if (!foundGame)
-		{
-			std::string errorTxt = "Game could't be found";
-
-			sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::ERROR));
-			sendPacket.WriteString(errorTxt);
-			client->Send(sendPacket);
-		}
-		else
-		{
-			_clientes->erase(_clientes->begin() + it);
-			selector.Remove(client);
-			client->Disconnect();
-			delete client;
-			it--;
-		}
-	}
-	*/
 }
 
 void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<std::string,Match>* games)

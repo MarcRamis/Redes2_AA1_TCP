@@ -11,6 +11,8 @@ class Game
 	
 	void SetTurn(std::vector<TcpSocket*>* _clientes, Player &player);
 public:
+	bool canChat;
+	bool gameStart;
 	
 	void StartGame(std::vector<TcpSocket*>* _clientes, Player &player);
 	void LoopGame(std::vector<TcpSocket*>* _clientes, Player &player);

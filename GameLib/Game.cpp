@@ -2,13 +2,16 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player &player)
 {
-	for (int i = 0; i < _clientes->size() + 1; i++)
+	while (true)
 	{
-		if (i == player.idTurn)
+		if (gameTurn == player.idTurn)
 		{
+			// puedes jugar
+			canChat = false;
 		}
 		else
 		{
+			canChat = true;
 		}
 	}
 }
@@ -68,7 +71,6 @@ void Game::SetTurn(std::vector<TcpSocket*>* _clientes, Player &player)
 		}
 
 		ammountOrgans.push_back(std::pair<int, int>(tmpAmmount, player.idOtherTurns.at(i)));
-		//ammountOrgans.push_back(tmpAmmount);
 		tmpAmmount = 0;
 	}
 	
@@ -98,34 +100,6 @@ void Game::SetTurn(std::vector<TcpSocket*>* _clientes, Player &player)
 			break;
 		}
 	}
-
-
-	//std::cout << "My ammount of organs: " << myAmmount << std::endl;
-	//for (int i = 0; i < _clientes->size() + 1; i++)
-	//{
-	//	std::cout << "Client "<< i + 1 << " has " << otherAmmountOrgans.at(i) << " Organs "<< std::endl;
-	//}
-	//std::cout << std::endl;
-	
-	
-	
-	
-	
-	// set turn
-	//for (int i = 0; i < _clientes->size() + 1; i++)
-	//{
-	//	if (myAmmount >= otherAmmountOrgans.at(i))
-	//	{
-	//		std::cout << "true then my turn is updated to that turn" << std::endl;
-	//		player.idTurn = i;
-	//		std::cout << "Now my turn is: " << player.idTurn << std::endl;
-	//	}
-	//	else {
-	//		std::cout << "false do nothing" << std::endl;
-	//	}
-	//	
-	//	std::cout << std::endl;
-	//}
 }
 
 void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player &player)
@@ -157,5 +131,5 @@ void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player &player)
 	}
 	SetTurn(_clientes, player);
 	DrawGame(_clientes, player);
-	//LoopGame(_clientes, player);
+	LoopGame(_clientes, player);
 }
