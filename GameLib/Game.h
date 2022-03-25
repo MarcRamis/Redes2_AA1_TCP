@@ -4,20 +4,21 @@
 #include <queue>
 #include "TcpSocket.h"
 #include "Player.h"
+#include "Protocol.h"
 
 class Game
 {
-	int gameTurn;
+public:
 	int playerIdThatWon;
 	
-	void SetTurn(std::vector<TcpSocket*>* _clientes, Player &player);
-public:
+	int gameTurn;
 	bool canChat;
 	bool gameStart;
 	std::vector<bool> gameReady;
 	std::string gameName;
 	unsigned short localPort;
 	
+	void SetTurn(std::vector<TcpSocket*>* _clientes, Player &player);
 	bool WinCondition(std::vector<TcpSocket*>* _clientes, Player& player);
 
 	void StartGame(std::vector<TcpSocket*>* _clientes, Player &player);

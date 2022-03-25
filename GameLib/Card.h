@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include "ConsoleControl.h"
 
 class Player;
@@ -21,5 +22,5 @@ public:
 	~Card();
 	
 	virtual void Draw();
-	virtual void Play(Player& p, Card* cardToEffect, int id);
+	virtual void Play(Player& p, Card* cardToEffect, int id/*, std::vector<Card*> containerToPush, std::vector<Card*> containerToErase*/);
 };

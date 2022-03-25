@@ -10,7 +10,7 @@ public:
 	Organ(EOrganType _type);
 
 	void Draw();
-	void Play(Player& p, Card* cardToEffect, int id);
+	void Play(Player& p, Card* cardToEffect, int id/*, std::vector<Card*> containerToPush, std::vector<Card*> containerToErase*/);
 	
 	Organ::EOrganType GetType(Organ *organ);
 };

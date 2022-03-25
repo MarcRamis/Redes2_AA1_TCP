@@ -37,6 +37,6 @@ void Virus::Draw()
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 }
 
-void Virus::Play(Player& p, Card* cardToEffect, int id)
+void Virus::Play(Player& p, Card* cardToEffect, int id/*, std::vector<Card*> containerToPush, std::vector<Card*> containerToErase*/)
 {
 }

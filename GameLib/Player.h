@@ -11,6 +11,8 @@ public:
 	
 	// id
 	int id;
+	
+	//std::vector<Player> players;
 	std::vector<int> idOtherPlayers;
 	// game turn
 	int idTurn;

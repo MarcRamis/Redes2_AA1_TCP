@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Selector.h"
+#include "Player.h"
 #include <string>
 
 class Protocol
@@ -18,13 +19,18 @@ public:
 	
 	enum class PEER_PEERProtocol
 	{
-		SENDMESSAGE, ACKREADYFORGAME, ISREADY, NONE
+		SENDMESSAGE, ACKREADYFORGAME, ISREADY, PLAYCARD, NONE
 	};
 
 	static struct Peer
 	{
+		// Match protocols
 		static void AckPassword(TcpSocket* client, std::string &gameName);
 		static void Chat(std::vector<TcpSocket*>* _clientes, bool& isChat);
+		
+		// Card protocols
+		//static void PlayCard(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed, int idPlayerThatFirstPlayerAffected, int idCardAffected);
+		//static void ReceivedPlayedCard(InputMemoryStream pack, Player& p);
 	};
 	static struct Server
 	{

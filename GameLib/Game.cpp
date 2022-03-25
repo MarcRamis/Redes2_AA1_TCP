@@ -32,7 +32,6 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	std::cout << localPort << " | " << player.idTurn + 1 << std::endl;
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 
-
 	// Player game turn
 	ConsoleXY(HUD_MAX_POS_GAME_X / 2, HUD_MAX_POS_GAME_Y / 2);
 	std::cout << " Player Turn: ";
@@ -147,8 +146,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			switch (player.hand.at(selection - 1)->cardType)
 			{
 			case Card::EType::ORGAN:
-				player.hand.at(selection - 1)->Play(player, nullptr, selection - 1);
-
+				player.hand.at(selection - 1)->Play(player, nullptr, selection - 1/*, player.playedCards, player.hand*/);
 				break;
 			case Card::EType::MEDICINE:
 				break;
@@ -160,26 +158,33 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				break;
 			}
 
+			if (!player.hand.at(selection - 1)->endTurn)
+			{
+				std::cout << "This card is already played" << std::endl;
+			}
+			else
+			{
 
+				endTurn = !endTurn;
+			}
+
+			if (gameTurn != _clientes->size()) gameTurn++;
+			else gameTurn = 0;
+			
+			// SEND PROTOCOL
+			ConsoleWait(2000.f);
+			//Protocol::Peer::PlayCard(_clientes, player.id, selection - 1, -1, -1); 
 		}
 		else // Discard cards
 		{
 			// discard
-		}
-		
-		if (!player.hand.at(selection - 1)->endTurn)
-		{
-			std::cout << "This card is already played" << std::endl;
-		}
-		else
-		{
+
 			endTurn = !endTurn;
+			ConsoleWait(2000.f);
 		}
+	
 	}
 	
-	if (gameTurn != _clientes->size()) gameTurn++;
-	else gameTurn = 0;
-
 	DrawGame(_clientes, player);
 }
 
@@ -308,7 +313,6 @@ bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player& player)
 
 void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	;
 	ConsoleClear();
 	std::cout << "DEALING CARDS" << std::endl << std::endl;
 	ConsoleWait(1000.f);
@@ -316,7 +320,8 @@ void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	srand(player.randomSeed);
 
 	player.maze = new Maze();
-
+	
+	// DEAL INITIAL CARDS
 	for (int i = 0; i < _clientes->size() + 1; i++)
 	{
 		if (i == player.idTurn)
@@ -332,7 +337,10 @@ void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
 			player.otherhands.push_back(cards);
 		}
 	}
-	SetTurn(_clientes, player);
+	
+	SetTurn(_clientes, player); // SET NEW TURN
 	DrawGame(_clientes, player);
+	
+	// UPDATE - LOOP GAME
 	LoopGame(_clientes, player);
 }

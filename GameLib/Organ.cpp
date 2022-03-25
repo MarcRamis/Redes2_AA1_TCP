@@ -39,7 +39,7 @@ void Organ::Draw()
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 }
 
-void Organ::Play(Player& p, Card* cardToEffect, int id)
+void Organ::Play(Player& p, Card* cardToAffect, int id/*, std::vector<Card*> containerToPush, std::vector<Card*> containerToErase*/)
 {
 	bool pushOnce = true;
 	
@@ -57,6 +57,16 @@ void Organ::Play(Player& p, Card* cardToEffect, int id)
 	{
 		p.playedCards.push_back(this);
 		p.hand.erase(p.hand.begin() + id);
+		//p.playedCards.push_back(this);
+		//p.hand.erase(p.hand.begin() + id);
+
+		// Draw new card
+		std::vector<Card*> tmpCards = p.maze->DealCards(1); 
+		for (Card* c : tmpCards)
+		{
+			p.hand.push_back(c);
+			std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
+		}
 	}
 	else
 	{
