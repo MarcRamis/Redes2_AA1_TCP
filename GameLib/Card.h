@@ -10,6 +10,7 @@ class Card
 {
 public:
 	
+	int id;
 	bool endTurn = true;
 
 	enum class EType { NONE, ORGAN, MEDICINE, VIRUS, TREATMENT };
@@ -22,5 +23,6 @@ public:
 	~Card();
 	
 	virtual void Draw();
-	virtual void Play(Player& p, Card* cardToEffect, int id/*, std::vector<Card*> containerToPush, std::vector<Card*> containerToErase*/);
+	virtual void Play(Player& p, Card* cardToEffect, int id);
+	virtual void InfectOrgan(Player& p, int playerToAffect, int idCardToAffect, int id);
 };

@@ -10,6 +10,7 @@ Organ::Organ(EOrganType _type) : type(_type) { cardType = EType::ORGAN; };
 
 void Organ::Draw()
 {
+
 	switch (type)
 	{
 	case Organ::EOrganType::JOKER:
@@ -36,13 +37,26 @@ void Organ::Draw()
 		break;
 	}
 
+	if (state == Card::EOrganState::INFECTED)
+	{
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << "<- infected | ";
+	}
+	else if (state == Card::EOrganState::IMMUNIZED)
+	{
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << "<- immune | ";
+	}
+	else if (state == Card::EOrganState::VACUNATED)
+	{
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << "<- vacunated | ";
+	}
+
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 }
 
-void Organ::Play(Player& p, Card* cardToAffect, int id/*, std::vector<Card*> containerToPush, std::vector<Card*> containerToErase*/)
+void Organ::Play(Player& p, Card* cardToAffect, int id)
 {
 	bool pushOnce = true;
-	
+
 	for (int i = 0; i < p.playedCards.size(); i++)
 	{
 		// this is done because we need to look at every played cards and if the first one is different but the second isn't it will push anyways on first iteration
@@ -55,13 +69,12 @@ void Organ::Play(Player& p, Card* cardToAffect, int id/*, std::vector<Card*> con
 	// so if some card is not the same we push back to played cards
 	if (pushOnce)
 	{
-		p.playedCards.push_back(this);
+		// Add to played cards
+		p.playedCards.push_back(this);                  
+		// Delete from his hand
 		p.hand.erase(p.hand.begin() + id);
-		//p.playedCards.push_back(this);
-		//p.hand.erase(p.hand.begin() + id);
-
 		// Draw new card
-		std::vector<Card*> tmpCards = p.maze->DealCards(1); 
+		std::vector<Card*> tmpCards = p.maze->DealCards(1);
 		for (Card* c : tmpCards)
 		{
 			p.hand.push_back(c);

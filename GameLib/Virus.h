@@ -10,6 +10,7 @@ public:
 	Virus(EVirusType _type);
 
 	void Draw();
-	void Play(Player& p, Card* cardToEffect, int id/*, std::vector<Card*> containerToPush, std::vector<Card*> containerToErase*/);
+	void Play(Player& p, Card* cardToAffect, int id);
+	void InfectOrgan(Player& p, int playerToAffect, int idCardToAffect, int id);
 };
 

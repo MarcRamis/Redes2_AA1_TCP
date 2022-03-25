@@ -252,7 +252,6 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 		// Make the selector wait for data on any socket
 		if (_selector->Wait())
 		{
-			//std::cout << "Entro BBSS" << std::endl;
 			// Test the listener
 			if (_selector->IsReady(_listener))
 			{
@@ -315,12 +314,16 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									strRec = packet.ReadString();
 									std::cout << client->GetRemotePort().port << ": " << strRec << std::endl;
 									break;
-								case Protocol::PEER_PEERProtocol::PLAYCARD:
+								case Protocol::PEER_PEERProtocol::PLAYORGAN:
 									
-									//Protocol::Peer::ReceivedPlayedCard(packet, player);
+									Protocol::Peer::ReceivedPlayedOrgan(_clientes,packet, player);
 
+									ConsoleWait(2000.f);
+									
 									if (game.gameTurn != _clientes->size()) game.gameTurn++;
 									else game.gameTurn = 0;
+
+									game.DrawGame(_clientes, player);
 
 									break;
 
@@ -370,7 +373,6 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 	sock->Connect(IP, PORT);
 
 	game.localPort = sock->GetLocalPort().port;
-	// std::cout << "Port: " << _localPort << std::endl;
 
 	std::thread messagesServer(ControlServidor, _clientes, _selector, sock, _exitBSS, _continueBSS);
 	messagesServer.detach();
