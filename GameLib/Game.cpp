@@ -129,10 +129,11 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 {
 	bool endTurn = true;
 	Card *tmpCard = new Card();
+	int selection = 0;
 
 	while (endTurn)
 	{
-		int selection = 0;
+		selection = 0;
 		do {
 			std::cout << "Use one of your cards: ( 1 - 3 ) or Discard ( 4 )" << std::endl;
 			std::cin >> selection;
@@ -146,7 +147,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			switch (player.hand.at(selection - 1)->cardType)
 			{
 			case Card::EType::ORGAN:
-				player.hand.at(selection - 1)->Play(player, nullptr, selection - 1/*, player.playedCards, player.hand*/);
+				player.hand.at(selection - 1)->Play(player, nullptr, selection - 1);
 				break;
 			case Card::EType::MEDICINE:
 				break;
@@ -170,19 +171,30 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 
 			if (gameTurn != _clientes->size()) gameTurn++;
 			else gameTurn = 0;
-			
-			// SEND PROTOCOL
-			ConsoleWait(2000.f);
-			//Protocol::Peer::PlayCard(_clientes, player.id, selection - 1, -1, -1); 
 		}
 		else // Discard cards
 		{
 			// discard
 
 			endTurn = !endTurn;
-			ConsoleWait(2000.f);
 		}
 	
+	}
+
+	// SEND PROTOCOOL
+	switch (player.hand.at(selection - 1)->cardType)
+	{
+	case Card::EType::ORGAN:
+		Protocol::Peer::SendPlayOrgan(_clientes, player.id, selection - 1);
+		break;
+	case Card::EType::MEDICINE:
+		break;
+	case Card::EType::TREATMENT:
+		break;
+	case Card::EType::VIRUS:
+		break;
+	default:
+		break;
 	}
 	
 	DrawGame(_clientes, player);

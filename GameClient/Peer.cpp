@@ -315,12 +315,13 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									strRec = packet.ReadString();
 									std::cout << client->GetRemotePort().port << ": " << strRec << std::endl;
 									break;
-								case Protocol::PEER_PEERProtocol::PLAYCARD:
+								case Protocol::PEER_PEERProtocol::PLAYORGAN:
 									
 									//Protocol::Peer::ReceivedPlayedCard(packet, player);
 
 									if (game.gameTurn != _clientes->size()) game.gameTurn++;
 									else game.gameTurn = 0;
+									game.DrawGame(_clientes, player);
 
 									break;
 
