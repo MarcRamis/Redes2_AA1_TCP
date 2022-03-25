@@ -1,6 +1,6 @@
 #include "Protocol.h"
 
-void Protocol::AckPassword(TcpSocket* client, std::string gameName)
+void Protocol::Peer::AckPassword(TcpSocket* client, std::string &gameName)
 {
 	std::string txtPassword = " ";
 	std::cout << "Write the correct password: " << std::endl;
@@ -13,7 +13,7 @@ void Protocol::AckPassword(TcpSocket* client, std::string gameName)
 	Status status = client->Send(pack);
 }
 
-void Protocol::Chat(std::vector<TcpSocket*>* _clientes, bool &isChat)
+void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool &isChat)
 {
 	std::string opc;
 

@@ -20,27 +20,13 @@ Player player;
 
 // Befor game variables
 unsigned short _localPort;
-std::vector<bool> gameReady;
-std::string gameName;
+
 
 void JoinGame(TcpSocket *client)
 {
 	OutputMemoryStream pack;
 	pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::JOINMATCH));
-	pack.WriteString(gameName);
-	Status status = client->Send(pack);
-}
-
-void AckPassword(TcpSocket* client)
-{
-	std::string txtPassword = " ";
-	std::cout << "Write the correct password: " << std::endl;
-	std::cin >> txtPassword;
-
-	OutputMemoryStream pack;
-	pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::ACK_PWD));
-	pack.WriteString(gameName);
-	pack.WriteString(txtPassword);
+	pack.WriteString(game.gameName);
 	Status status = client->Send(pack);
 }
 
@@ -72,9 +58,9 @@ void AskIfReady(std::vector<TcpSocket*>* _clientes)
 	while (!game.gameStart)
 	{
 		game.gameStart = true;
-		for (int i = 0; i < gameReady.size(); i++)
+		for (int i = 0; i < game.gameReady.size(); i++)
 		{
-			if (!gameReady.at(i)) {
+			if (!game.gameReady.at(i)) {
 				game.gameStart = false;
 			}
 		}
@@ -147,7 +133,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 					
 				case Protocol::BSS_PEERProtocol::REQ_PWD:
 
-					AckPassword(_socketBSS);
+					Protocol::Peer::AckPassword(_socketBSS, game.gameName);
 					
 					break;
 
@@ -170,7 +156,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, Tc
 						case Status::EStatusType::DONE:
 							
 							_clientes->push_back(tempSock);
-							gameReady.push_back(false);
+							game.gameReady.push_back(false);
 							_selector->Add(tempSock);
 							std::cout << "Se pudo conectar a " << port.ip << " con puerto " << port.port << std::endl;
 							
@@ -280,7 +266,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 					// Add the new client to the clients list
 					std::cout << "Llega el cliente con puerto: " << client->GetRemotePort().port << std::endl;
 					_clientes->push_back(client);
-					gameReady.push_back(false);
+					game.gameReady.push_back(false);
 					// Add the new client to the selector so that we will
 					// be notified when he sends something
 					_selector->Add(client);
@@ -332,7 +318,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									break;
 
 								case Protocol::PEER_PEERProtocol::ISREADY:
-									gameReady.at(it) = true;
+									game.gameReady.at(it) = true;
 									std::cout << _clientes->at(it)->GetRemotePort().port << ": Player remote is ready" << std::endl;
 									break;
 
@@ -475,8 +461,8 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 			pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::JOINMATCH));
 			
 			std::cout << "Write game name to join: " << std::endl;
-			std::cin >> gameName;
-			pack.WriteString(gameName);
+			std::cin >> game.gameName;
+			pack.WriteString(game.gameName);
 
 			Status status = sock->Send(pack);
 			if (status.GetStatus() != Status::EStatusType::DONE)
@@ -504,7 +490,7 @@ int main()
 	std::thread tAccepts(ControlPeers, &clientes, &selector, &listener, &exitBSS, &continueBSS);
 	tAccepts.detach();
 
-	Protocol::Chat(&clientes, game.canChat);
+	Protocol::Peer::Chat(&clientes, game.canChat);
 	
 	return 0;
 }
