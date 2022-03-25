@@ -18,16 +18,16 @@ std::mutex mtxConexiones;
 Game game;
 Player player;
 
-// Befor game variables
-unsigned short _localPort;
-
-
 void JoinGame(TcpSocket *client)
 {
 	OutputMemoryStream pack;
 	pack.Write(static_cast<int>(Protocol::PEER_BSSProtocol::JOINMATCH));
 	pack.WriteString(game.gameName);
 	Status status = client->Send(pack);
+	if (status.GetStatus() != Status::EStatusType::DONE)
+	{
+		std::cout << "No se envio el nombre del juego" << std::endl;
+	}
 }
 
 void AskIfReady(std::vector<TcpSocket*>* _clientes)
@@ -66,7 +66,6 @@ void AskIfReady(std::vector<TcpSocket*>* _clientes)
 		}
 	}
 	game.StartGame(_clientes, player);
-	//game.canChat = true;
 }
 
 void ControlServidor(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpSocket* _socketBSS, bool* _exitBSS, bool * _continueBSS)
@@ -238,7 +237,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 	bool running = true;
 
 	// Create a socket to listen to new connections
-	Status status = _listener->Listen(_localPort);
+	Status status = _listener->Listen(game.localPort);
 	if (status.GetStatus() != Status::EStatusType::DONE)
 	{
 		std::cout << "Error al abrir listener\n";
@@ -312,7 +311,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 								switch (static_cast<Protocol::PEER_PEERProtocol>(tempInt))
 								{
 								case Protocol::PEER_PEERProtocol::SENDMESSAGE:
-
+									
 									strRec = packet.ReadString();
 									std::cout << client->GetRemotePort().port << ": " << strRec << std::endl;
 									break;
@@ -362,7 +361,7 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 	TcpSocket* sock = new TcpSocket();
 	sock->Connect(IP, PORT);
 
-	_localPort = sock->GetLocalPort().port;
+	game.localPort = sock->GetLocalPort().port;
 	// std::cout << "Port: " << _localPort << std::endl;
 
 	std::thread messagesServer(ControlServidor, _clientes, _selector, sock, _exitBSS, _continueBSS);
@@ -434,9 +433,9 @@ void ConnectToBSS(std::vector<TcpSocket*>* _clientes, Selector* _selector, bool*
 			}
 
 			// Random seed 
-			player.randomSeed = _localPort;
+			player.randomSeed = game.localPort;
 			//std::cout << "My random seed is: " << player.randomSeed << std::endl;
-			pack.Write(_localPort);
+			pack.Write(game.localPort);
 			
 			player.idTurn = 0;
 			

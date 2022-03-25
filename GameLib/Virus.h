@@ -10,5 +10,6 @@ public:
 	Virus(EVirusType _type);
 
 	void Draw();
+	void Play(Player& p, Card* cardToEffect, int id);
 };
 

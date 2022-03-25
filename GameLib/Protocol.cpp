@@ -11,6 +11,10 @@ void Protocol::Peer::AckPassword(TcpSocket* client, std::string &gameName)
 	pack.WriteString(gameName);
 	pack.WriteString(txtPassword);
 	Status status = client->Send(pack);
+	if (status.GetStatus() != Status::EStatusType::DONE)
+	{
+		std::cout << "No se envio la password" << std::endl;
+	}
 }
 
 void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool &isChat)

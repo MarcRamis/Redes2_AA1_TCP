@@ -1,5 +1,7 @@
 #include "Organ.h"
 
+#include "Player.h"
+
 Organ::Organ()
 {
 }
@@ -37,17 +39,32 @@ void Organ::Draw()
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 }
 
-void Organ::ImmunizeOrgan()
-{ 
-	std::cout << "Inmunizar" << std::endl; 
-}
-
-void Organ::InfectateOrgan()
-{ 
-	std::cout << "Infectar" << std::endl;
-}
-
-void Organ::VacunateOrgan()
+void Organ::Play(Player& p, Card* cardToEffect, int id)
 {
-	std::cout << "Vacunar" << std::endl; 
+	bool pushOnce = true;
+	
+	for (int i = 0; i < p.playedCards.size(); i++)
+	{
+		// this is done because we need to look at every played cards and if the first one is different but the second isn't it will push anyways on first iteration
+		if (this->type == GetType(dynamic_cast<Organ*>(p.playedCards.at(i))))
+		{
+			pushOnce = false;
+			break;
+		}
+	}
+	// so if some card is not the same we push back to played cards
+	if (pushOnce)
+	{
+		p.playedCards.push_back(this);
+		p.hand.erase(p.hand.begin() + id);
+	}
+	else
+	{
+		endTurn = false;
+	}
+}
+
+Organ::EOrganType Organ::GetType(Organ* organ)
+{
+	return organ->type;
 }

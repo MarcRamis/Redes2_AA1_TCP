@@ -9,6 +9,9 @@ public:
 	
 	unsigned int randomSeed;
 	
+	// id
+	int id;
+	std::vector<int> idOtherPlayers;
 	// game turn
 	int idTurn;
 	std::vector<int> idOtherTurns;
@@ -17,9 +20,11 @@ public:
 	std::vector<Card*> hand;
 	std::vector<std::vector<Card*>> otherhands;
 	
+	// played cards
 	std::vector<Card*> playedCards;
 	std::vector<std::vector<Card*>> otherPlayedCards;
 	
+	// maze
 	Maze* maze;
 
 	Player();

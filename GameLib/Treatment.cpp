@@ -38,3 +38,8 @@ void Treatment::Draw()
 		ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 	}
 }
+
+void Treatment::Play(Player& p, Card* cardToEffect, int id)
+{
+}
+

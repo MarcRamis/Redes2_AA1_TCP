@@ -36,3 +36,7 @@ void Medicine::Draw()
 
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 }
+
+void Medicine::Play(Player& p, Card* cardToEffect, int id)
+{
+}

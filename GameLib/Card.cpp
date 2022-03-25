@@ -1,19 +1,13 @@
 #include "Card.h"
+#include "Player.h"
 
 void Card::Draw()
 {
 }
 
-void Card::ImmunizeOrgan()
+void Card::Play(Player& p, Card* cardToEffect, int id)
 {
-}
 
-void Card::VacunateOrgan()
-{
-}
-
-void Card::InfectateOrgan()
-{
 }
 
 Card::Card()

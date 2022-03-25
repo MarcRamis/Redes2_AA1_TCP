@@ -26,4 +26,8 @@ public:
 		static void AckPassword(TcpSocket* client, std::string &gameName);
 		static void Chat(std::vector<TcpSocket*>* _clientes, bool& isChat);
 	};
+	static struct Server
+	{
+
+	};
 };

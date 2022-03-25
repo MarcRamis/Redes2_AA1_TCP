@@ -3,18 +3,23 @@
 #include <iostream>
 #include "ConsoleControl.h"
 
+class Player;
+
 class Card
 {
 public:
 	
+	bool endTurn = true;
+
 	enum class EType { NONE, ORGAN, MEDICINE, VIRUS, TREATMENT };
 	EType cardType;
+
+	enum class EOrganState { NONE, IMMUNIZED, VACUNATED, INFECTED };
+	EOrganState state = EOrganState::NONE;
 	
 	Card();
 	~Card();
 	
-	virtual void Draw() = 0;
-	virtual void ImmunizeOrgan();
-	virtual void VacunateOrgan();
-	virtual void InfectateOrgan();
+	virtual void Draw();
+	virtual void Play(Player& p, Card* cardToEffect, int id);
 };
