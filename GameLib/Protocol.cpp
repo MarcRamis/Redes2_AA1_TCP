@@ -20,7 +20,7 @@ void Protocol::Peer::AckPassword(TcpSocket* client, std::string& gameName)
 void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool& isChat)
 {
 	std::string opc;
-
+	
 	while (opc != "exit")
 	{
 		if (isChat)
@@ -68,18 +68,6 @@ void Protocol::Peer::ReceivedPlayedOrgan(std::vector<TcpSocket*>* _clientes, Inp
 	// Read all ids
 	int idPlayerThatUsedCard = 0; int idCardPlayed = 0;
 	pack.Read(&idPlayerThatUsedCard); pack.Read(&idCardPlayed);
-
-	std::cout << "player id: " << idPlayerThatUsedCard << std::endl;
-	std::cout << "card id: " << idCardPlayed << std::endl;
-
-	for (int i = 0; i < p.otherhands.size(); i++)
-	{
-		std::cout << "id hand: " << i << " has" << std::endl;
-		for (int j = 0; j < p.otherhands.at(i).size(); j++)
-		{
-			p.otherhands.at(i).at(j)->Draw();
-		}
-	}
 
 	for (int i = 0; i < p.idOtherPlayers.size(); i++)
 	{
