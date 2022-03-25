@@ -148,6 +148,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			{
 			case Card::EType::ORGAN:
 				player.hand.at(selection - 1)->Play(player, nullptr, selection - 1);
+				Protocol::Peer::SendPlayOrgan(_clientes, player.id, selection - 1); // send protocol to modify other players 
 				break;
 			case Card::EType::MEDICINE:
 				break;
@@ -169,6 +170,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				endTurn = !endTurn;
 			}
 
+			ConsoleWait(2000.f);
 			if (gameTurn != _clientes->size()) gameTurn++;
 			else gameTurn = 0;
 		}
@@ -180,23 +182,6 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 		}
 	
 	}
-
-	// SEND PROTOCOOL
-	switch (player.hand.at(selection - 1)->cardType)
-	{
-	case Card::EType::ORGAN:
-		Protocol::Peer::SendPlayOrgan(_clientes, player.id, selection - 1);
-		break;
-	case Card::EType::MEDICINE:
-		break;
-	case Card::EType::TREATMENT:
-		break;
-	case Card::EType::VIRUS:
-		break;
-	default:
-		break;
-	}
-	
 	DrawGame(_clientes, player);
 }
 
@@ -334,6 +319,8 @@ void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	player.maze = new Maze();
 	
 	// DEAL INITIAL CARDS
+	player.otherPlayedCards.resize(_clientes->size());
+
 	for (int i = 0; i < _clientes->size() + 1; i++)
 	{
 		if (i == player.idTurn)

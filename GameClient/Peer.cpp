@@ -317,10 +317,13 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									break;
 								case Protocol::PEER_PEERProtocol::PLAYORGAN:
 									
-									//Protocol::Peer::ReceivedPlayedCard(packet, player);
+									Protocol::Peer::ReceivedPlayedOrgan(_clientes,packet, player);
 
+									ConsoleWait(2000.f);
+									
 									if (game.gameTurn != _clientes->size()) game.gameTurn++;
 									else game.gameTurn = 0;
+
 									game.DrawGame(_clientes, player);
 
 									break;

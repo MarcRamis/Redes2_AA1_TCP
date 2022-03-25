@@ -1,6 +1,6 @@
 #include "Protocol.h"
 
-void Protocol::Peer::AckPassword(TcpSocket* client, std::string &gameName)
+void Protocol::Peer::AckPassword(TcpSocket* client, std::string& gameName)
 {
 	std::string txtPassword = " ";
 	std::cout << "Write the correct password: " << std::endl;
@@ -17,7 +17,7 @@ void Protocol::Peer::AckPassword(TcpSocket* client, std::string &gameName)
 	}
 }
 
-void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool &isChat)
+void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool& isChat)
 {
 	std::string opc;
 
@@ -26,7 +26,8 @@ void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool &isChat)
 		if (isChat)
 		{
 			std::cout << "Write a message: " << std::endl;
-			std::getline(std::cin, opc);
+			//std::getline(std::cin, opc);
+			std::cin >> opc;
 
 			OutputMemoryStream pack;
 			pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
@@ -53,7 +54,7 @@ void Protocol::Peer::SendPlayOrgan(std::vector<TcpSocket*>* _clientes, int idPla
 		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::PLAYORGAN));
 
 		pack.Write(idPlayerThatUsedCard); pack.Write(idCardPlayed); // id player that used a card & the position of his card
-		
+
 		Status status = _clientes->at(i)->Send(pack);
 		if (status.GetStatus() != Status::EStatusType::DONE)
 		{
@@ -62,25 +63,37 @@ void Protocol::Peer::SendPlayOrgan(std::vector<TcpSocket*>* _clientes, int idPla
 	}
 }
 
-void Protocol::Peer::ReceivedPlayedOrgan(InputMemoryStream pack, Player &p)
+void Protocol::Peer::ReceivedPlayedOrgan(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p)
 {
 	// Read all ids
-	//int idPlayerThatUsedCard = 0, int idCardPlayed = 0, int idPlayerThatFirstPlayerAffected = 0, int idCardAffected = 0;
-	//pack.Read(&idPlayerThatUsedCard);
-	//pack.Read(&idCardPlayed);
-	//pack.Read(&idPlayerThatFirstPlayerAffected);
-	//pack.Read(&idCardAffected);
-	
-	// See if the card affected is mine or not
-	//if (*idPlayerThatFirstPlayerAffected == p.id)
-	//{
-	//	// Make the move
-	//	p.otherhands.at(*idPlayerThatUsedCard).at(*idCardPlayed)->Play(p, p.playedCards.at(*idCardAffected), *idCardPlayed);
-	//}
-	//else
-	//{
-	//	p.otherhands.at(*idPlayerThatUsedCard).at(*idCardPlayed)->Play(p, p.otherPlayedCards.at(*idPlayerThatFirstPlayerAffected).at(*idCardAffected), *idCardPlayed);
-	//}
+	int idPlayerThatUsedCard = 0; int idCardPlayed = 0;
+	pack.Read(&idPlayerThatUsedCard); pack.Read(&idCardPlayed);
 
-	
+	std::cout << "player id: " << idPlayerThatUsedCard << std::endl;
+	std::cout << "card id: " << idCardPlayed << std::endl;
+
+	for (int i = 0; i < p.otherhands.size(); i++)
+	{
+		std::cout << "id hand: " << i << " has" << std::endl;
+		for (int j = 0; j < p.otherhands.at(i).size(); j++)
+		{
+			p.otherhands.at(i).at(j)->Draw();
+		}
+	}
+
+	for (int i = 0; i < p.idOtherPlayers.size(); i++)
+	{
+		if (p.idOtherPlayers.at(i) == idPlayerThatUsedCard)
+		{
+			// Add the card played for other player & erase from his hand, also he needs to draw a new one 
+			p.otherPlayedCards.at(i).push_back(p.otherhands.at(i).at(idCardPlayed));
+			p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
+			std::vector<Card*> tmpCards = p.maze->DealCards(1);
+			for (Card* c : tmpCards)
+			{
+				p.otherhands.at(i).push_back(c);
+			}
+		}
+	}
+
 }

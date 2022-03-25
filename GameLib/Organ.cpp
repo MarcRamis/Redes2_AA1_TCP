@@ -55,11 +55,10 @@ void Organ::Play(Player& p, Card* cardToAffect, int id/*, std::vector<Card*> con
 	// so if some card is not the same we push back to played cards
 	if (pushOnce)
 	{
+		// Add to played cards
 		p.playedCards.push_back(this);
+		// Delete from his hand
 		p.hand.erase(p.hand.begin() + id);
-		//p.playedCards.push_back(this);
-		//p.hand.erase(p.hand.begin() + id);
-
 		// Draw new card
 		std::vector<Card*> tmpCards = p.maze->DealCards(1); 
 		for (Card* c : tmpCards)

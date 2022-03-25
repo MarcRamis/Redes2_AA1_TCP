@@ -3,6 +3,15 @@
 #include "Card.h"
 #include "Maze.h"
 
+struct OtherPlayerCards
+{
+	int idPlayer;
+	std::vector<Card*> hand;
+	
+	OtherPlayerCards();
+	OtherPlayerCards(int _idPlayer, std::vector<Card*> _hand) : idPlayer(_idPlayer), hand(_hand)  {};
+};
+
 class Player
 {
 public:

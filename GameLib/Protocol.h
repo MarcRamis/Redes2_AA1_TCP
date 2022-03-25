@@ -30,7 +30,7 @@ public:
 		
 		// Card protocols
 		static void SendPlayOrgan(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed);
-		static void ReceivedPlayedOrgan(InputMemoryStream pack, Player& p);
+		static void ReceivedPlayedOrgan(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p);
 	};
 	static struct Server
 	{
