@@ -235,10 +235,11 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			default:
 				break;
 			}
+			if (!endTurn)
+			{
+				NextTurn(_clientes, player);
+			}
 			
-			ConsoleWait(2000.f);
-			if (gameTurn != _clientes->size()) gameTurn++;
-			else gameTurn = 0;
 		}
 		else // Discard cards
 		{
@@ -246,30 +247,32 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 
 			selectionToAffect = 0;
 			do {
-				std::cout << "Select the number of cards you want to discard" << std::endl;
+				std::cout << "Select the number of cards you want to discard(1 - 3) or (-1) to exit" << std::endl;
 				std::cin >> selectionToAffect;
-			} while (selectionToAffect < 1 || selectionToAffect > 3);
-
-			for (int i = 0; i < selectionToAffect; i++)
+			} while ((selectionToAffect < 1 || selectionToAffect > 3) && selectionToAffect != -1);
+			if (selectionToAffect != -1)
 			{
-				player.maze->discardDeck.push(player.hand.at(i));
-			}
-			for (int i = 0; i < selectionToAffect; i++)
-			{
-				player.hand.erase(player.hand.begin());
-			}
-			std::vector<Card*> tmpCards = player.maze->DealCards(selectionToAffect);
-			for (Card* c : tmpCards)
-			{
-				player.hand.push_back(c);
-			}
-			Protocol::Peer::SendDiscardCard(_clientes, player.id, selectionToAffect);
+				for (int i = 0; i < selectionToAffect; i++)
+				{
+					player.maze->discardDeck.push(player.hand.at(i));
+				}
+				for (int i = 0; i < selectionToAffect; i++)
+				{
+					player.hand.erase(player.hand.begin());
+				}
+				std::vector<Card*> tmpCards = player.maze->DealCards(selectionToAffect);
+				for (Card* c : tmpCards)
+				{
+					player.hand.push_back(c);
+					std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
+				}
+				Protocol::Peer::SendDiscardCard(_clientes, player.id, selectionToAffect);
 
-			endTurn = !endTurn;
+				endTurn = !endTurn;
 
-			ConsoleWait(2000.f);
-			if (gameTurn != _clientes->size()) gameTurn++;
-			else gameTurn = 0;
+				NextTurn(_clientes, player);
+			}
+			
 		}
 	
 	}
