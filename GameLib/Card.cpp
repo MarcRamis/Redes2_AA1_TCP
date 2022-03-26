@@ -27,6 +27,16 @@ Organ* Card::GetOrganCard()
     return dynamic_cast<Organ*>(this);
 }
 
+Virus* Card::GetVirusCard()
+{
+    return dynamic_cast<Virus*>(this);
+}
+
+Medicine* Card::GetMedicineCard()
+{
+    return dynamic_cast<Medicine*>(this);
+}
+
 Card::Card()
 {
 }

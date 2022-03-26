@@ -37,7 +37,6 @@ public:
 		static void ReceivedMedicineCard(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p);
 		static void SendDiscardCard(std::vector<TcpSocket*>* _clientes, int idPlayerThatDiscard, int numberCards);
 		static void ReceivedDiscardCard(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p);
-
 		static void YouLost(std::vector<TcpSocket*>* _clientes);
 	};
 	static struct Server

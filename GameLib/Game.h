@@ -37,6 +37,8 @@ public:
 	
 	int GetIDFromSelectedPlayer(Player& player, int selection);
 	int GetIDFromSelectedCard(Player& player, int selection);
+	Card *GetCardFromSelectedCard(Player& player, int selection);
 
 	bool OrganAlreadyExistsInTable(Player& player, Card* c);
+	bool CardIsTheSameType(Player& player, Card* c, Card* c2);
 };

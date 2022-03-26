@@ -2,7 +2,7 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	while (!WinCondition(_clientes,player))
+	while (true)
 	{
 		if (gameTurn == player.idTurn)
 		{
@@ -221,6 +221,16 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				do {
 					std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
 					std::cin >> selectionToAffect;
+
+					if (CardIsTheSameType(player, player.hand.at(selection - 1), GetCardFromSelectedCard(player, selectionToAffect)))
+					{
+						std::cout << "mismo tipo" << std::endl;
+					}
+					else
+					{
+						std::cout << "no es el mismo tipo" << std::endl;
+					}
+
 				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
 				
 				if (selectionToAffect != -1) {
@@ -501,6 +511,22 @@ int Game::GetIDFromSelectedCard(Player& player, int selection)
 	return -1;
 }
 
+Card* Game::GetCardFromSelectedCard(Player& player, int selection)
+{
+	for (int i = 0; i < player.otherPlayedCards.size(); i++)
+	{
+		for (int j = 0; j < player.otherPlayedCards.at(i).size(); j++)
+		{
+			if (player.otherPlayedCards.at(i).at(j)->id == selection)
+			{
+				return player.otherPlayedCards.at(i).at(j);
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 bool Game::OrganAlreadyExistsInTable(Player& player, Card *c)
 {
 	for (int i = 0; i < player.playedCards.size(); i++)
@@ -508,6 +534,38 @@ bool Game::OrganAlreadyExistsInTable(Player& player, Card *c)
 		if (c->GetOrganCard()->type == player.playedCards.at(i)->GetOrganCard()->type)
 		{
 			return true;
+		}
+	}
+	return false;
+}
+
+bool Game::CardIsTheSameType(Player& player, Card* c, Card* c2)
+{
+	for (int i = 0; i < player.playedCards.size(); i++)
+	{
+		// primero mirar si la carta es de tipo joker porque entonces vale siempre
+		if (c->GetVirusCard()->type == Virus::EVirusType::VIRUSJOKER)
+		{
+			return true;
+		}
+		else
+		{
+			if (c->GetVirusCard()->type == Virus::EVirusType::VIRUSBONE && player.playedCards.at(i)->GetOrganCard()->type == Organ::EOrganType::BONE)
+			{
+				return true;
+			}
+			if (c->GetVirusCard()->type == Virus::EVirusType::VIRUSBRAIN && player.playedCards.at(i)->GetOrganCard()->type == Organ::EOrganType::BRAIN)
+			{
+				return true;
+			}
+			if (c->GetVirusCard()->type == Virus::EVirusType::VIRUSHEART && player.playedCards.at(i)->GetOrganCard()->type == Organ::EOrganType::HEART)
+			{
+				return true;
+			}
+			if (c->GetVirusCard()->type == Virus::EVirusType::VIRUSSTOMACH && player.playedCards.at(i)->GetOrganCard()->type == Organ::EOrganType::STOMACH)
+			{
+				return true;
+			}
 		}
 	}
 	return false;

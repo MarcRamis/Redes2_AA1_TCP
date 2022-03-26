@@ -31,4 +31,6 @@ public:
 	virtual void VacunateOrgan(Player& p, int idCardToAffect, int id);
 
 	Organ* GetOrganCard();
+	Virus* GetVirusCard();
+	Medicine* GetMedicineCard();
 };
