@@ -11,8 +11,7 @@
 class Game
 {
 public:
-	int playerIdThatWon;
-	
+
 	int gameTurn;
 	bool canChat;
 	bool gameStart;

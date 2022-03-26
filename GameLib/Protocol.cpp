@@ -311,3 +311,18 @@ void Protocol::Peer::ReceivedDiscardCard(std::vector<TcpSocket*>* _clientes, Inp
 		}
 	}
 }
+
+void Protocol::Peer::YouLost(std::vector<TcpSocket*>* _clientes)
+{
+	OutputMemoryStream pack; 
+
+	for (int i = 0; i < _clientes->size(); i++)
+	{
+		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::YOULOST));
+		Status status = _clientes->at(i)->Send(pack);
+		if (status.GetStatus() != Status::EStatusType::DONE)
+		{
+			std::cout << "No se envio el protocolo que indica a los jugadores que han perdido" << std::endl;
+		}
+	}
+}

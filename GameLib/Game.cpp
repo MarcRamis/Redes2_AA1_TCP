@@ -2,7 +2,7 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	while (_clientes->size() != 0 /*|| !WinCondition(_clientes, player)*/)
+	while (!WinCondition(_clientes, player))
 	{
 		if (gameTurn == player.idTurn)
 		{
@@ -14,6 +14,7 @@ void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 			canChat = true;
 		}
 	}
+
 }
 
 void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
@@ -413,19 +414,19 @@ bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player& player)
 			tmpAmmount++;
 		}
 	}
+	//std::cout << "Me: " << tmpAmmount << std::endl;
 	if (tmpAmmount == 4)
 	{
-		playerIdThatWon = player.id;
-		std::cout << "yo he ganado" << std::endl;
+		std::cout << "You won! You are such a pro!" << std::endl;
+		Protocol::Peer::YouLost(_clientes);
 		return true;
 	}
 	else
 	{
-		tmpAmmount = 0;
-
 		// Check if other players have won
 		for (int i = 0; i < player.otherPlayedCards.size(); i++)
 		{
+			tmpAmmount = 0;
 			for (int j = 0; j < player.otherPlayedCards.at(i).size(); j++)
 			{
 				if (player.otherPlayedCards.at(i).at(j)->cardType == Card::EType::ORGAN && player.otherPlayedCards.at(i).at(j)->state != Card::EOrganState::INFECTED)
@@ -433,11 +434,14 @@ bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player& player)
 					tmpAmmount++;
 				}
 			}
+			//std::cout << "Other: " << tmpAmmount << std::endl;
 			if (tmpAmmount == 4)
 			{
-				playerIdThatWon = player.idOtherPlayers.at(i);
-				std::cout << "alguien ha ganado" << std::endl;
 				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
 	}
