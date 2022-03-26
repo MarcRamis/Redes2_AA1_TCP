@@ -14,6 +14,10 @@ void Card::InfectOrgan(Player& p, int playerToAffect, int idCardToAffect, int id
 {
 }
 
+void Card::VacunateOrgan(Player& p, int idCardToAffect, int id)
+{
+}
+
 Card::Card()
 {
 }

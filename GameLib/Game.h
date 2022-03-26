@@ -23,8 +23,11 @@ public:
 	void SetTurn(std::vector<TcpSocket*>* _clientes, Player &player);
 	bool WinCondition(std::vector<TcpSocket*>* _clientes, Player& player);
 	bool CorrectIdCardInTable(int selection, Player& player);
+	
 	int GetIDFromSelectedPlayer(Player& player, int selection);
 	int GetIDFromSelectedCard(Player& player, int selection);
+
+	int GetIDFromSelectedCardMine(Player& player, int selection);
 
 	void StartGame(std::vector<TcpSocket*>* _clientes, Player &player);
 	void LoopGame(std::vector<TcpSocket*>* _clientes, Player &player);
