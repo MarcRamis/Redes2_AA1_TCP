@@ -69,20 +69,14 @@ void Protocol::Peer::ReceivedPlayedOrgan(std::vector<TcpSocket*>* _clientes, Inp
 	int idPlayerThatUsedCard = 0; int idCardPlayed = 0;
 	pack.Read(&idPlayerThatUsedCard); pack.Read(&idCardPlayed);
 
-	for (int i = 0; i < p.idOtherPlayers.size(); i++)
+	int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard);
+	// Add the card played for other player & erase from his hand, also he needs to draw a new one 
+	p.otherPlayedCards.at(i).push_back(p.otherhands.at(i).at(idCardPlayed));
+	p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
+	std::vector<Card*> tmpCards = p.maze->DealCards(1);
+	for (Card* c : tmpCards)
 	{
-		if (p.idOtherPlayers.at(i) == idPlayerThatUsedCard)
-		{
-			// Add the card played for other player & erase from his hand, also he needs to draw a new one 
-			p.otherPlayedCards.at(i).push_back(p.otherhands.at(i).at(idCardPlayed));
-			p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
-			std::vector<Card*> tmpCards = p.maze->DealCards(1);
-			for (Card* c : tmpCards)
-			{
-				p.otherhands.at(i).push_back(c);
-			}
-			break;
-		}
+		p.otherhands.at(i).push_back(c);
 	}
 
 }
@@ -128,14 +122,14 @@ void Protocol::Peer::ReceivedOrganInfected(std::vector<TcpSocket*>* _clientes, I
 	if (id_card != -1)
 	{
 		std::cout << "soy yo entra" << std::endl;
-		if (p.hand.at(id_card)->state == Card::EOrganState::INFECTED) {
-			p.maze->discardDeck.push(p.hand.at(id_card)); // This add the card to the discard deck
-			p.hand.erase(p.hand.begin() + id_card); // This deletes the card from the table
+		if (p.playedCards.at(id_card)->state == Card::EOrganState::INFECTED) {
+			p.maze->discardDeck.push(p.playedCards.at(id_card)); // This add the card to the discard deck
+			p.playedCards.erase(p.playedCards.begin() + id_card); // This deletes the card from the table
 		}
 		else
 		{
 			std::cout << "infecta la carta" << std::endl;
-			p.hand.at(id_card)->state = Card::EOrganState::INFECTED; // here i'm just infecting the card
+			p.playedCards.at(id_card)->state = Card::EOrganState::INFECTED; // here i'm just infecting the card
 		}
 		
 		// discard the card used
@@ -159,87 +153,32 @@ void Protocol::Peer::ReceivedOrganInfected(std::vector<TcpSocket*>* _clientes, I
 	}
 	else
 	{
+		id_card = p.FindPositionCardbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+		int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+		
+		std::cout << "Posicion de la carta en contenedor: " << id_card << std::endl;;
+		std::cout << "Posicion del player en contenedor: " << id_player << std::endl;;
+		
+		// Infect 
+		// If it was infected before, then dies
+		if (p.otherPlayedCards.at(id_player).at(id_card)->state == Card::EOrganState::INFECTED) {
+			std::cout << "entra2 if" << std::endl;
+			p.maze->discardDeck.push(p.otherPlayedCards.at(id_player).at(id_card)); // This add the card to the discard deck
+			p.otherPlayedCards.at(id_player).erase(p.otherPlayedCards.at(id_player).begin() + id_card); // This deletes the card from the table
+		}
+		else
+		{
+			std::cout << "infect xd" << std::endl;
+			p.otherPlayedCards.at(id_player).at(id_player)->state = Card::EOrganState::INFECTED; // here i'm just infecting the card
+		}
 
+		int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard);
+		p.maze->discardDeck.push(p.otherhands.at(i).at(idCardPlayed));
+		p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
+		std::vector<Card*> tmpCards = p.maze->DealCards(1);
+		for (Card* c : tmpCards)
+		{
+			p.otherhands.at(i).push_back(c);
+		}
 	}
-
-
-
-	//if (p.id == idPlayerAffected)
-	//{
-	//	playerIsMe = true;
-	//	// Infect
-	//	// If it was infected before, then dies
-	//
-	//	if (p.hand.at(id_card)->state == Card::EOrganState::INFECTED) {
-	//		p.maze->discardDeck.push(p.hand.at(id_card)); // This add the card to the discard deck
-	//		p.hand.erase(p.hand.begin() + id_card); // This deletes the card from the table
-	//	}
-	//	else
-	//	{
-	//		std::cout << "a" << std::endl;
-	//		p.hand.at(id_card)->state = Card::EOrganState::INFECTED; // here i'm just infecting the card
-	//	}
-	//	
-	//	// discard the card used
-	//	for (int i = 0; i < p.idOtherPlayers.size(); i++)
-	//	{
-	//		if (p.idOtherPlayers.at(i) == idPlayerThatUsedCard)
-	//		{
-	//			std::cout << "se descarta la carta jugada" << std::endl;
-	//			// Discard card used
-	//			// Add the card played for other player & erase from his hand, also he needs to draw a new one
-	//			p.maze->discardDeck.push(p.otherhands.at(i).at(idCardPlayed));
-	//			p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
-	//			std::vector<Card*> tmpCards = p.maze->DealCards(1);
-	//			for (Card* c : tmpCards)
-	//			{
-	//				p.otherhands.at(i).push_back(c);
-	//			}
-	//			break;
-	//		}
-	//	}
-	//}
-	//
-	//// Look if the card to affect is not mine
-	//if (!playerIsMe)
-	//{
-	//	std::cout << "Player is not me" << std::endl;
-	//	for (int i = 0; i < p.otherPlayedCards.size(); i++)
-	//	{
-	//		// Infect 
-	//		for (int j = 0; j < p.otherPlayedCards.at(i).size(); j++)
-	//		{
-	//			std::cout << "entra" << std::endl;
-	//			// If it was infected before, then dies
-	//			if (p.otherPlayedCards.at(j).at(idCardFromPlayerAffected)->state == Card::EOrganState::INFECTED) {
-	//				std::cout << "entra2 if" << std::endl;
-	//				p.maze->discardDeck.push(p.otherPlayedCards.at(i).at(idCardFromPlayerAffected)); // This add the card to the discard deck
-	//				p.otherPlayedCards.at(j).erase(p.otherPlayedCards.at(i).begin() + idCardFromPlayerAffected); // This deletes the card from the table
-	//			}
-	//			else
-	//			{
-	//				std::cout << "entra2 else" << std::endl;
-	//				p.otherPlayedCards.at(j).at(idCardFromPlayerAffected)->state = Card::EOrganState::INFECTED; // here i'm just infecting the card
-	//			}
-	//			break;
-	//		}
-	//	}
-	//	
-	//	for (int i = 0; i < p.idOtherPlayers.size(); i++)
-	//	{
-	//		if (p.idOtherPlayers.at(i) == idPlayerThatUsedCard)
-	//		{
-	//			// Discard card used
-	//			// Add the card played for other player & erase from his hand, also he needs to draw a new one
-	//			p.maze->discardDeck.push(p.otherhands.at(i).at(idCardPlayed));
-	//			p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
-	//			std::vector<Card*> tmpCards = p.maze->DealCards(1);
-	//			for (Card* c : tmpCards)
-	//			{
-	//				p.otherhands.at(i).push_back(c);
-	//			}
-	//			break;
-	//		}
-	//	}
-	//}
 }
