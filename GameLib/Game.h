@@ -32,4 +32,6 @@ public:
 	void DrawGame(std::vector<TcpSocket*>* _clientes, Player &player);
 	
 	void PlayCard(std::vector<TcpSocket*>* _clientes, Player& player);
+
+	void NextTurn(std::vector<TcpSocket*>* _clientes, Player& player);
 };

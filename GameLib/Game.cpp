@@ -137,7 +137,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	countRow = 1;
 	while (!printDiscardDeck.empty())
 	{
-		ConsoleXY(HUD_MAX_POS_GAME_X + 40, countRow);
+		ConsoleXY(HUD_MAX_POS_GAME_X + 45, countRow);
 		printDiscardDeck.top()->Draw();
 		countRow++;
 		printDiscardDeck.pop();
@@ -210,7 +210,6 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
 
 				if (selectionToAffect != -1) {
-					std::cout << "Selected: " << selectionToAffect;
 					player.hand.at(selection - 1)->InfectOrgan(player, GetIDFromSelectedPlayer(player, selection), GetIDFromSelectedCard(player, selection), selection - 1);
 					endTurn = !endTurn;
 				}
@@ -227,9 +226,8 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
 				
 				if (selectionToAffect != -1) {
-					std::cout << "Selected: " << selectionToAffect;
 					player.hand.at(selection - 1)->InfectOrgan(player, GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect), selection -1);
-					Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1, GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect)); // send protocol to modify other players 
+					Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1, GetIDFromSelectedPlayer(player, selectionToAffect), selectionToAffect); // send protocol to modify other players 
 					endTurn = !endTurn;
 				}
 				
@@ -250,6 +248,16 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 		}
 	
 	}
+	DrawGame(_clientes, player);
+}
+
+void Game::NextTurn(std::vector<TcpSocket*>* _clientes, Player& player)
+{
+	ConsoleWait(2000.f);
+
+	if (gameTurn != _clientes->size()) gameTurn++;
+	else gameTurn = 0;
+
 	DrawGame(_clientes, player);
 }
 
