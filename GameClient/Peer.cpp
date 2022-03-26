@@ -325,6 +325,11 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									Protocol::Peer::ReceivedOrganInfected(_clientes, packet, player);
 									game.NextTurn(_clientes, player);
 
+								case Protocol::PEER_PEERProtocol::DISCARDCARDS:
+									Protocol::Peer::ReceivedDiscardCard(_clientes, packet, player);
+									game.NextTurn(_clientes, player);
+									break;
+
 									break;
 								case Protocol::PEER_PEERProtocol::ISREADY:
 									game.gameReady.at(it) = true;

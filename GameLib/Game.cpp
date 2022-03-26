@@ -244,7 +244,32 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 		{
 			// discard
 
+			selectionToAffect = 0;
+			do {
+				std::cout << "Select the number of cards you want to discard" << std::endl;
+				std::cin >> selectionToAffect;
+			} while (selectionToAffect < 1 || selectionToAffect > 3);
+
+			for (int i = 0; i < selectionToAffect; i++)
+			{
+				player.maze->discardDeck.push(player.hand.at(i));
+			}
+			for (int i = 0; i < selectionToAffect; i++)
+			{
+				player.hand.erase(player.hand.begin());
+			}
+			std::vector<Card*> tmpCards = player.maze->DealCards(selectionToAffect);
+			for (Card* c : tmpCards)
+			{
+				player.hand.push_back(c);
+			}
+			Protocol::Peer::SendDiscardCard(_clientes, player.id, selectionToAffect);
+
 			endTurn = !endTurn;
+
+			ConsoleWait(2000.f);
+			if (gameTurn != _clientes->size()) gameTurn++;
+			else gameTurn = 0;
 		}
 	
 	}

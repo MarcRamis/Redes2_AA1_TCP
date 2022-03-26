@@ -243,3 +243,49 @@ void Protocol::Peer::ReceivedOrganInfected(std::vector<TcpSocket*>* _clientes, I
 	//	}
 	//}
 }
+
+void Protocol::Peer::SendDiscardCard(std::vector<TcpSocket*>* _clientes, int idPlayerThatDiscard, int numberCards)
+{
+	OutputMemoryStream pack;
+	pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::DISCARDCARDS));
+
+	pack.Write(idPlayerThatDiscard); pack.Write(numberCards); // id player that discard & the number of cards
+
+	for (int i = 0; i < _clientes->size(); i++)
+	{
+		Status status = _clientes->at(i)->Send(pack);
+		if (status.GetStatus() != Status::EStatusType::DONE)
+		{
+			std::cout << "El mensaje Peer2Peer no se ha enviado: [ No se ha enviado la carta jugada ]" << std::endl;
+		}
+	}
+}
+
+void Protocol::Peer::ReceivedDiscardCard(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p)
+{
+	// Read all ids
+	int idPlayerThatDiscard = 0; int numberOfCards = 0;
+	pack.Read(&idPlayerThatDiscard); pack.Read(&numberOfCards);
+
+	for (int i = 0; i < p.idOtherPlayers.size(); i++)
+	{
+		if (p.idOtherPlayers.at(i) == idPlayerThatDiscard)
+		{
+
+			for (int j = 0; j < numberOfCards; j++)
+			{
+				p.maze->discardDeck.push(p.otherhands.at(i).at(j));
+			}
+			for (int j = 0; j < numberOfCards; j++)
+			{
+				p.otherhands.at(i).erase(p.otherhands.at(i).begin());
+			}
+			std::vector<Card*> tmpCards = p.maze->DealCards(numberOfCards);
+			for (Card* c : tmpCards)
+			{
+				p.otherhands.at(i).push_back(c);
+			}
+
+		}
+	}
+}
