@@ -324,11 +324,21 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									
 									Protocol::Peer::ReceivedOrganInfected(_clientes, packet, player);
 									game.NextTurn(_clientes, player);
-
+									break;
+								
 								case Protocol::PEER_PEERProtocol::DISCARDCARDS:
 									Protocol::Peer::ReceivedDiscardCard(_clientes, packet, player);
 									game.NextTurn(_clientes, player);
 									break;
+
+								case Protocol::PEER_PEERProtocol::YOULOST:
+
+									std::cout << "You lost, bastard..." << std::endl;
+									std::cout << "You should take a look at this guy, he plays well ---> https://www.youtube.com/watch?v=7iiE-cE03So" << std::endl;
+
+									std::cout << "Closing program in T-20" << std::endl;
+									ConsoleWait(20000.f);
+									exit(0);
 
 									break;
 								case Protocol::PEER_PEERProtocol::VACUNATEORGAN:

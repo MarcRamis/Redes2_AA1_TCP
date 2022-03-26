@@ -7,12 +7,16 @@
 #include "TcpSocket.h"
 #include "Player.h"
 #include "Protocol.h"
+#include "Organ.h"
+#include "Virus.h"
+#include "Medicine.h"
+#include "Treatment.h"
+
 
 class Game
 {
 public:
-	int playerIdThatWon;
-	
+
 	int gameTurn;
 	bool canChat;
 	bool gameStart;
@@ -33,4 +37,6 @@ public:
 	
 	int GetIDFromSelectedPlayer(Player& player, int selection);
 	int GetIDFromSelectedCard(Player& player, int selection);
+
+	bool OrganAlreadyExistsInTable(Player& player, Card* c);
 };
