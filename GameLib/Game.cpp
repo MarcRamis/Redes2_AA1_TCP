@@ -2,7 +2,7 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	while (true)
+	while (!WinCondition(_clientes, player))
 	{
 		if (gameTurn == player.idTurn)
 		{
@@ -411,7 +411,7 @@ void Game::SetTurn(std::vector<TcpSocket*>* _clientes, Player& player)
 	ConsoleWait(1000.f);
 }
 
-bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player& player)
+bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player player)
 {
 	// Check if this player has won
 	int tmpAmmount = 0;
@@ -437,7 +437,9 @@ bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player& player)
 			tmpAmmount = 0;
 			for (int j = 0; j < player.otherPlayedCards.at(i).size(); j++)
 			{
-				if (player.otherPlayedCards.at(i).at(j)->cardType == Card::EType::ORGAN && player.otherPlayedCards.at(i).at(j)->state != Card::EOrganState::INFECTED)
+				Card tempCard = *player.otherPlayedCards.at(i).at(j);
+
+				if (tempCard.cardType == Card::EType::ORGAN && tempCard.state != Card::EOrganState::INFECTED)
 				{
 					tmpAmmount++;
 				}
@@ -446,10 +448,6 @@ bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player& player)
 			if (tmpAmmount == 4)
 			{
 				return true;
-			}
-			else
-			{
-				return false;
 			}
 		}
 	}
