@@ -210,7 +210,8 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
 
 				if (selectionToAffect != -1) {
-					player.hand.at(selection - 1)->InfectOrgan(player, GetIDFromSelectedPlayer(player, selection), GetIDFromSelectedCard(player, selection), selection - 1);
+					player.hand.at(selection - 1)->VacunateOrgan(player, GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect), selection - 1);
+					Protocol::Peer::SendMedicineCard(_clientes, player.id, selection - 1, selectionToAffect); // send protocol to modify other players 
 					endTurn = !endTurn;
 				}
 
@@ -227,7 +228,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				
 				if (selectionToAffect != -1) {
 					player.hand.at(selection - 1)->InfectOrgan(player, GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect), selection -1);
-					Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1, GetIDFromSelectedPlayer(player, selectionToAffect), selectionToAffect); // send protocol to modify other players 
+					Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1, selectionToAffect); // send protocol to modify other players 
 					endTurn = !endTurn;
 				}
 				
