@@ -77,3 +77,35 @@ int Player::FindPositionCardbyIDCardInOtherPlayedCards(int cardID)
 
 	return -1;
 }
+
+int Player::FindPositionPlayerbyIDCardInOtherHands(int cardID)
+{
+	for (int i = 0; i < otherhands.size(); i++)
+	{
+		for (int j = 0; j < otherhands.at(i).size(); j++)
+		{
+			if (otherhands.at(i).at(j)->id == cardID)
+			{
+				return i;
+			}
+		}
+	}
+
+	return -1;
+}
+
+int Player::FindPositionPlayerbyIDCardInOtherPlayedCards(int cardID)
+{
+	for (int i = 0; i < otherPlayedCards.size(); i++)
+	{
+		for (int j = 0; j < otherPlayedCards.at(i).size(); j++)
+		{
+			if (otherPlayedCards.at(i).at(j)->id == cardID)
+			{
+				return i;
+			}
+		}
+	}
+
+	return -1;
+}
