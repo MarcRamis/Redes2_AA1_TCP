@@ -19,7 +19,7 @@ public:
 	
 	enum class PEER_PEERProtocol
 	{
-		SENDMESSAGE, ACKREADYFORGAME, ISREADY, PLAYORGAN, NONE
+		SENDMESSAGE, ACKREADYFORGAME, ISREADY, PLAYORGAN, INFECTORGAN, NONE
 	};
 
 	static struct Peer
@@ -31,6 +31,8 @@ public:
 		// Card protocols
 		static void SendPlayOrgan(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed);
 		static void ReceivedPlayedOrgan(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p);
+		static void SendInfectOrgan(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed, int idPlayerAffected, int idCardFromPlayerAffected);
+		static void ReceivedOrganInfected(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p);
 	};
 	static struct Server
 	{

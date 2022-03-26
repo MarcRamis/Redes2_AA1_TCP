@@ -85,3 +85,25 @@ void Protocol::Peer::ReceivedPlayedOrgan(std::vector<TcpSocket*>* _clientes, Inp
 	}
 
 }
+
+void Protocol::Peer::SendInfectOrgan(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed, int idPlayerAffected, int idCardFromPlayerAffected)
+{
+	OutputMemoryStream pack;
+	for (int i = 0; i < _clientes->size(); i++)
+	{
+		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::INFECTORGAN));
+		
+		pack.Write(idPlayerThatUsedCard); pack.Write(idCardPlayed); // id player that used a card & the position of his card
+		pack.Write(idPlayerAffected); pack.Write(idCardFromPlayerAffected); // id player that the card has affected & the id of his card
+
+		Status status = _clientes->at(i)->Send(pack);
+		if (status.GetStatus() != Status::EStatusType::DONE)
+		{ 
+			std::cout << "El mensaje Peer2Peer no se ha enviado: [ No se ha enviado la carta jugada ]" << std::endl;
+		}
+	}
+}
+
+void Protocol::Peer::ReceivedOrganInfected(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p)
+{
+}

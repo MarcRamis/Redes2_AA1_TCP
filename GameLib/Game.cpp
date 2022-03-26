@@ -171,11 +171,11 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 					std::cin >> selectionToEffect;
 				} while (!CorrectIdCardInTable(selectionToEffect, player) && selectionToEffect != -1);
 
-				//if (selectionToEffect != -1) {
-				//	std::cout << "Selected: " << selectionToEffect;
-				//	player.hand.at(selection - 1)->InfectOrgan(player, GetSelectedPlayer(player, selection), GetSelectedCard(player, selection), selection - 1);
-				//	endTurn = !endTurn;
-				//}
+				if (selectionToEffect != -1) {
+					std::cout << "Selected: " << selectionToEffect;
+					player.hand.at(selection - 1)->InfectOrgan(player, GetSelectedPlayer(player, selection), GetSelectedCard(player, selection), selection - 1);
+					endTurn = !endTurn;
+				}
 
 				break;
 			case Card::EType::TREATMENT:
@@ -191,7 +191,8 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				
 				if (selectionToEffect != -1) {
 					std::cout << "Selected: " << selectionToEffect;
-					player.hand.at(selection - 1)->InfectOrgan(player, GetSelectedPlayer(player,selection), GetSelectedCard(player,selection), selection -1);
+					player.hand.at(selection - 1)->InfectOrgan(player, GetSelectedPlayer(player, selectionToEffect), GetSelectedCard(player, selectionToEffect), selection -1);
+					Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1); // send protocol to modify other players 
 					endTurn = !endTurn;
 				}
 				
