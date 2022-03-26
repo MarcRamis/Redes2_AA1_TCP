@@ -21,4 +21,5 @@ public:
 	
 	Maze();
 	std::vector<Card*> DealCards(unsigned int maxCardsToDeal);
+	void FillDeck(std::vector<Card*> deck);
 };

@@ -357,13 +357,29 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 						}
 						else if (client->StatusReceived().GetStatus() == Status::EStatusType::DISCONNECTED)
 						{
+							game.PlayerDisconnected(_clientes, player, it);
+
+							std::cout << "Player: " << client->GetRemotePort().port << " disconnected" << std::endl;;
+							
 							_clientes->erase(_clientes->begin() + it);
 							_selector->Remove(client);
 							client->Disconnect();
 							delete client;
 							it--;
 
-							std::cout << "Elimino el socket que se ha desconectado\n";
+
+							if (_clientes->size() == 0)
+							{
+								std::cout << "The game has finished because all the player have disconnected. " << std::endl;
+								std::cout << "Closing program. " << std::endl;
+								ConsoleWait(5000.f);
+								mtxConexiones.unlock();
+								exit(0);
+							}
+							ConsoleWait(2000.f);
+							
+
+							game.DrawGame(_clientes, player);
 						}
 						else
 						{

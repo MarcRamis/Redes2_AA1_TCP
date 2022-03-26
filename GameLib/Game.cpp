@@ -2,7 +2,7 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	while (_clientes->size() != 0 || !WinCondition(_clientes, player))
+	while (_clientes->size() != 0 /*|| !WinCondition(_clientes, player)*/)
 	{
 		if (gameTurn == player.idTurn)
 		{
@@ -13,11 +13,6 @@ void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 		{
 			canChat = true;
 		}
-	}
-
-	if (_clientes->size() == 0)
-	{
-		std::cout << "The game has finished. " << std::endl;
 	}
 }
 
@@ -142,8 +137,9 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 		countRow++;
 		printDiscardDeck.pop();
 	}
-
+	
 	// HUD --> (MY HAND)
+	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 	ConsoleXY(0, HUD_MAX_POS_GAME_Y + 2);
 	std::cout << "My hand: " << std::endl;
 	for (Card* c : player.hand)
@@ -278,6 +274,42 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 	
 	}
 	DrawGame(_clientes, player);
+}
+
+void Game::PlayerDisconnected(std::vector<TcpSocket*>* _clientes, Player& player, int i)
+{
+	for (int j = 0; j < player.otherhands.at(i).size(); j++)
+	{
+		player.maze->discardDeck.push(player.otherhands.at(i).at(j));
+	}
+	for (int j = 0; j < player.otherPlayedCards.at(i).size(); j++)
+	{
+		player.maze->discardDeck.push(player.otherhands.at(i).at(j));
+	}
+	
+	int tmpTurnPlayerDisconnected = player.idOtherTurns.at(i);
+
+	player.otherhands.erase(player.otherhands.begin() + i);
+	player.otherPlayedCards.erase(player.otherPlayedCards.begin() + i);
+	player.idOtherTurns.erase(player.idOtherTurns.begin() + i);
+	player.idOtherPlayers.erase(player.idOtherPlayers.begin() + i);
+
+	// Get new turn
+	if (tmpTurnPlayerDisconnected < player.idTurn) {
+		player.idTurn--;
+	}
+	for (int turn = 0; turn < player.idOtherTurns.size(); turn++)
+	{
+		if (tmpTurnPlayerDisconnected < player.idOtherTurns.at(turn)) {
+			player.idOtherTurns.at(turn)--;
+		}
+	}
+	
+	if (gameTurn == tmpTurnPlayerDisconnected && gameTurn == _clientes->size())
+	{
+		if (gameTurn != _clientes->size()) gameTurn++;
+		else gameTurn = 0;
+	}
 }
 
 void Game::NextTurn(std::vector<TcpSocket*>* _clientes, Player& player)
@@ -479,7 +511,7 @@ void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	
 	// DEAL INITIAL CARDS
 	player.otherPlayedCards.resize(_clientes->size());
-
+	
 	for (int i = 0; i < _clientes->size() + 1; i++)
 	{
 		if (i == player.idTurn)

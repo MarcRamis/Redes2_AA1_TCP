@@ -159,24 +159,45 @@ Maze::Maze()
 	tmpDeck.push_back(card);
 	counter++;
 
-	// RANDOMIZAR LA BARAJA
-	std::random_shuffle(tmpDeck.begin(), tmpDeck.end());
-
-	// AÑADIRLA AL STACK DE CARTAS
-	for(int i = 0; i < tmpDeck.size(); i++)
-	{
-		deck.push(tmpDeck[i]);
-	}
+	FillDeck(tmpDeck);
 }
 
 std::vector<Card*> Maze::DealCards(unsigned int maxCardsToDeal)
 {
 	std::vector<Card*> tmpHand;
-
+	
+	
 	for (int i = 0; i < maxCardsToDeal; i++)
 	{
-		tmpHand.push_back(deck.top());
-		deck.pop();
+		if (deck.size() > 0)
+		{
+			tmpHand.push_back(deck.top());
+			deck.pop();
+		}
+		else
+		{
+			std::vector<Card*> tmpDiscard;
+			while (!discardDeck.empty())
+			{
+				tmpDiscard.push_back(discardDeck.top());
+				discardDeck.pop();
+			}
+			FillDeck(tmpDiscard);
+			i--;
+		}
+
 	}
 	return tmpHand;
+}
+
+void Maze::FillDeck(std::vector<Card*> tmpDeck)
+{
+	// RANDOMIZE MAZE
+	std::random_shuffle(tmpDeck.begin(), tmpDeck.end());
+	
+	// ADD TO THE CARDS STACK
+	for (int i = 0; i < tmpDeck.size(); i++)
+	{
+		deck.push(tmpDeck[i]);
+	}
 }
