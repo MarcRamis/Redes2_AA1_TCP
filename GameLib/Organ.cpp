@@ -55,35 +55,16 @@ void Organ::Draw()
 
 void Organ::Play(Player& p, Card* cardToAffect, int id)
 {
-	bool pushOnce = true;
-
-	for (int i = 0; i < p.playedCards.size(); i++)
+	// Add to played cards
+	p.playedCards.push_back(this);
+	// Delete from his hand
+	p.hand.erase(p.hand.begin() + id);
+	// Draw new card
+	std::vector<Card*> tmpCards = p.maze->DealCards(1);
+	for (Card* c : tmpCards)
 	{
-		// this is done because we need to look at every played cards and if the first one is different but the second isn't it will push anyways on first iteration
-		if (this->type == GetType(dynamic_cast<Organ*>(p.playedCards.at(i))))
-		{
-			pushOnce = false;
-			break;
-		}
-	}
-	// so if some card is not the same we push back to played cards
-	if (pushOnce)
-	{
-		// Add to played cards
-		p.playedCards.push_back(this);                  
-		// Delete from his hand
-		p.hand.erase(p.hand.begin() + id);
-		// Draw new card
-		std::vector<Card*> tmpCards = p.maze->DealCards(1);
-		for (Card* c : tmpCards)
-		{
-			p.hand.push_back(c);
-			std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
-		}
-	}
-	else
-	{
-		endTurn = false;
+		p.hand.push_back(c);
+		std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
 	}
 }
 

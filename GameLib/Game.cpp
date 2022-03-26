@@ -2,7 +2,7 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	while (!WinCondition(_clientes, player))
+	while (!WinCondition(_clientes,player))
 	{
 		if (gameTurn == player.idTurn)
 		{
@@ -185,8 +185,8 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			switch (player.hand.at(selection - 1)->cardType)
 			{
 			case Card::EType::ORGAN:
-
-				if (!player.hand.at(selection - 1)->endTurn)
+				
+				if (OrganAlreadyExistsInTable(player, player.hand.at(selection - 1)))
 				{
 					std::cout << "This card is already played" << std::endl;
 				}
@@ -239,10 +239,8 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			}
 			
 		}
-		else // Discard cards
+		else 
 		{
-			// discard
-
 			selectionToAffect = 0;
 			do {
 				std::cout << "Select the number of cards you want to discard(1 - 3) or (-1) to exit" << std::endl;
@@ -501,6 +499,18 @@ int Game::GetIDFromSelectedCard(Player& player, int selection)
 		}
 	}
 	return -1;
+}
+
+bool Game::OrganAlreadyExistsInTable(Player& player, Card *c)
+{
+	for (int i = 0; i < player.playedCards.size(); i++)
+	{
+		if (c->GetOrganCard()->type == player.playedCards.at(i)->GetOrganCard()->type)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
