@@ -81,7 +81,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	{
 		std::cout << c->id << " - ";
 		c->Draw();
-		//std::cout << std::endl;
+		std::cout << std::endl;
 	}
 
 	// Draw other played cards
@@ -103,11 +103,30 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 			}
 			std::cout << player.otherPlayedCards.at(i).at(j)->id << " - ";
 			player.otherPlayedCards.at(i).at(j)->Draw();
-			//std::cout << std::endl;
+			std::cout << std::endl;
 		}
 	}
+	
+	// HUD --> (DECK WHERE DRAW)
+	ConsoleXY(HUD_MAX_POS_GAME_X + 40, 0);
+	ConsoleSetColor(ConsoleColor::DARKYELLOW, ConsoleColor::BLACK);
+	std::cout << "- | Deck[ " << player.maze->deck.size() << " ]| -" << std::endl;
 
-	// HUD --> (MY CARDS)
+	// HUD --> (DISCARD DECK)
+	std::stack<Card*> printDiscardDeck = player.maze->discardDeck;
+	ConsoleXY(HUD_MAX_POS_GAME_X + 70, 0);
+	ConsoleSetColor(ConsoleColor::DARKYELLOW, ConsoleColor::BLACK);
+	std::cout << "- | Discard Deck[ " << player.maze->discardDeck.size() << " ]| -" << std::endl;
+	int countRow = 1;
+	while (!printDiscardDeck.empty())
+	{
+		ConsoleXY(HUD_MAX_POS_GAME_X + 40, countRow);
+		printDiscardDeck.top()->Draw();
+		countRow++;
+		printDiscardDeck.pop();
+	}
+
+	// HUD --> (MY HAND)
 	ConsoleXY(0, HUD_MAX_POS_GAME_Y + 2);
 	std::cout << "My hand: " << std::endl;
 	for (Card* c : player.hand)
@@ -116,6 +135,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	}
 	std::cout << std::endl << std::endl;
 
+	// HUD --> (OTHER HANDS)
 	for (auto c : player.otherhands)
 	{
 		std::cout << "Other hands: " << std::endl;
@@ -125,6 +145,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 		}
 		std::cout << std::endl;
 	}
+
 }
 
 void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
@@ -132,7 +153,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 	bool endTurn = true;
 	Card *tmpCard = new Card();
 	int selection = 0;
-	int selectionToEffect = 0;
+	int selectionToAffect = 0;
 
 	while (endTurn)
 	{
@@ -164,16 +185,16 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				break;
 			case Card::EType::MEDICINE:
 
-				selectionToEffect = 0;
+				selectionToAffect = 0;
 				do {
 
 					std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
-					std::cin >> selectionToEffect;
-				} while (!CorrectIdCardInTable(selectionToEffect, player) && selectionToEffect != -1);
+					std::cin >> selectionToAffect;
+				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
 
-				if (selectionToEffect != -1) {
-					std::cout << "Selected: " << selectionToEffect;
-					player.hand.at(selection - 1)->InfectOrgan(player, GetSelectedPlayer(player, selection), GetSelectedCard(player, selection), selection - 1);
+				if (selectionToAffect != -1) {
+					std::cout << "Selected: " << selectionToAffect;
+					player.hand.at(selection - 1)->InfectOrgan(player, GetIDFromSelectedPlayer(player, selection), GetIDFromSelectedCard(player, selection), selection - 1);
 					endTurn = !endTurn;
 				}
 
@@ -182,17 +203,16 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				break;
 			case Card::EType::VIRUS:
 
-				selectionToEffect = 0;
+				selectionToAffect = 0;
 				do {
-					
 					std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
-					std::cin >> selectionToEffect;
-				} while (!CorrectIdCardInTable(selectionToEffect, player) && selectionToEffect != -1);
+					std::cin >> selectionToAffect;
+				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
 				
-				if (selectionToEffect != -1) {
-					std::cout << "Selected: " << selectionToEffect;
-					player.hand.at(selection - 1)->InfectOrgan(player, GetSelectedPlayer(player, selectionToEffect), GetSelectedCard(player, selectionToEffect), selection -1);
-					Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1); // send protocol to modify other players 
+				if (selectionToAffect != -1) {
+					std::cout << "Selected: " << selectionToAffect;
+					player.hand.at(selection - 1)->InfectOrgan(player, GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect), selection -1);
+					Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1, GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect)); // send protocol to modify other players 
 					endTurn = !endTurn;
 				}
 				
@@ -200,7 +220,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			default:
 				break;
 			}
-
+			
 			ConsoleWait(2000.f);
 			if (gameTurn != _clientes->size()) gameTurn++;
 			else gameTurn = 0;
@@ -363,7 +383,7 @@ bool Game::CorrectIdCardInTable(int selection, Player& player)
 	return false;
 }
 
-int Game::GetSelectedPlayer(Player& player, int selection)
+int Game::GetIDFromSelectedPlayer(Player& player, int selection)
 {
 	for (int i = 0; i < player.otherPlayedCards.size(); i++)
 	{
@@ -378,7 +398,7 @@ int Game::GetSelectedPlayer(Player& player, int selection)
 	return -1;
 }
 
-int Game::GetSelectedCard(Player& player, int selection)
+int Game::GetIDFromSelectedCard(Player& player, int selection)
 {
 	for (int i = 0; i < player.otherPlayedCards.size(); i++)
 	{

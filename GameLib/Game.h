@@ -1,7 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <stack>
 #include <queue>
+
 #include "TcpSocket.h"
 #include "Player.h"
 #include "Protocol.h"
@@ -21,8 +23,8 @@ public:
 	void SetTurn(std::vector<TcpSocket*>* _clientes, Player &player);
 	bool WinCondition(std::vector<TcpSocket*>* _clientes, Player& player);
 	bool CorrectIdCardInTable(int selection, Player& player);
-	int GetSelectedPlayer(Player& player, int selection);
-	int GetSelectedCard(Player& player, int selection);
+	int GetIDFromSelectedPlayer(Player& player, int selection);
+	int GetIDFromSelectedCard(Player& player, int selection);
 
 	void StartGame(std::vector<TcpSocket*>* _clientes, Player &player);
 	void LoopGame(std::vector<TcpSocket*>* _clientes, Player &player);
