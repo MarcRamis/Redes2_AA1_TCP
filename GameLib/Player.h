@@ -39,4 +39,18 @@ public:
 
 	Player();
 	~Player();
+	
+	int FindPlayerInOtherIdPlayers(int id);
+
+	// Iterators find positions in containers by id card
+	// Cards
+	// Hands
+	// My Hand
+	int FindPositionCardbyIDCardInHand(int cardID);
+	// Other Hands
+	int FindPositionCardbyIDCardInOtherHands(int cardID);
+	// My played cards
+	int FindPositionCardbyIDCardInPlayedCards(int cardID);
+	// Other played cards
+	int FindPositionCardbyIDCardInOtherPlayedCards(int cardID);
 };
