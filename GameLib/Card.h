@@ -25,5 +25,5 @@ public:
 	virtual void Draw();
 	virtual void Play(Player& p, Card* cardToEffect, int id);
 	virtual void InfectOrgan(Player& p, int playerToAffect, int idCardToAffect, int id);
-	virtual void VacunateOrgan(Player& p, int playerToAffect, int idCardToAffect, int id);
+	virtual void VacunateOrgan(Player& p, int idCardToAffect, int id);
 };

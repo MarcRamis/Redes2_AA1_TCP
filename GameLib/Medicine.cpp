@@ -43,16 +43,16 @@ void Medicine::Play(Player& p, Card* cardToEffect, int id)
 {
 }
 
-void Medicine::VacunateOrgan(Player& p, int playerToAffect, int idCardToAffect, int id)
+void Medicine::VacunateOrgan(Player& p, int idCardToAffect, int id)
 {
 	// Vacunate the card
 	// If it was vacunated before, then immunize
-	if (p.otherPlayedCards.at(playerToAffect).at(idCardToAffect)->state == Card::EOrganState::VACUNATED) {
-		p.otherPlayedCards.at(playerToAffect).at(idCardToAffect)->state = Card::EOrganState::IMMUNIZED; // immunize card
+	if (p.playedCards.at(idCardToAffect)->state == Card::EOrganState::VACUNATED) {
+		p.playedCards.at(idCardToAffect)->state = Card::EOrganState::IMMUNIZED; // immunize card
 	}
 	else
 	{
-		p.otherPlayedCards.at(playerToAffect).at(idCardToAffect)->state = Card::EOrganState::VACUNATED; // vacunate card
+		p.playedCards.at(idCardToAffect)->state = Card::EOrganState::VACUNATED; // vacunate card
 	}
 
 	// DISCARD THE CARD USED
