@@ -26,8 +26,8 @@ void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool& isChat)
 		if (isChat)
 		{
 			std::cout << "Write a message: " << std::endl;
-			//std::getline(std::cin, opc);
-			std::cin >> opc;
+			std::getline(std::cin, opc);
+			//std::cin >> opc;
 
 			OutputMemoryStream pack;
 			pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
