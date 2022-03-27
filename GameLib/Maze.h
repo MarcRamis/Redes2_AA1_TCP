@@ -13,13 +13,17 @@ class Medicine;
 class Virus;
 class Treatment;
 
+class Player;
+
 class Maze
 {
 public:
 	std::stack<Card*> deck;
 	std::stack<Card*> discardDeck;
-	
+
 	Maze();
 	std::vector<Card*> DealCards(unsigned int maxCardsToDeal);
 	void FillDeck(std::vector<Card*> deck);
+	void DiscardCard(Player& p, Card* c, int id);
+	void DiscardOtherCard(Player& p, Card* c, int i, int id);
 };

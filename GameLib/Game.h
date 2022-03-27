@@ -29,7 +29,7 @@ public:
 	void DrawGame(std::vector<TcpSocket*>* _clientes, Player &player);
 
 	void SetTurn(std::vector<TcpSocket*>* _clientes, Player &player);
-	bool WinCondition(std::vector<TcpSocket*>* _clientes, Player& player);
+	bool WinCondition(std::vector<TcpSocket*>* _clientes, Player player);
 	bool CorrectIdCardInTable(int selection, Player& player);
 	void NextTurn(std::vector<TcpSocket*>* _clientes, Player& player);
 	void PlayCard(std::vector<TcpSocket*>* _clientes, Player& player);

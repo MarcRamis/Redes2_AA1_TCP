@@ -45,30 +45,48 @@ void Virus::Play(Player& p, Card* cardToEffect, int id)
 
 void Virus::InfectOrgan(Player& p, int playerToAffect, int idCardToAffect, int id)
 {
-	// Infect the card
-	// If it was infected before, then dies
-	if (p.otherPlayedCards.at(playerToAffect).at(idCardToAffect)->state != Card::EOrganState::IMMUNIZED)
-	{
-		if (p.otherPlayedCards.at(playerToAffect).at(idCardToAffect)->state == Card::EOrganState::INFECTED) {
-			p.maze->discardDeck.push(p.otherPlayedCards.at(playerToAffect).at(idCardToAffect)); // This add the card to the discard deck
-			p.otherPlayedCards.at(playerToAffect).erase(p.otherPlayedCards.at(playerToAffect).begin() + idCardToAffect); // This deletes the card from the table
-		}
-		else
-		{
-			p.otherPlayedCards.at(playerToAffect).at(idCardToAffect)->state = Card::EOrganState::INFECTED; // here i'm just infecting the card
-		}
+	Infect(p, p.otherPlayedCards.at(playerToAffect).at(idCardToAffect), playerToAffect, idCardToAffect);
+	p.maze->DiscardCard(p, this, id);
+}
 
-		// DISCARD THE CARD USED
-		// Add to discard cards
-		p.maze->discardDeck.push(this);
-		// Delete from the hand
-		p.hand.erase(p.hand.begin() + id);
-		// Draw new card
-		std::vector<Card*> tmpCards = p.maze->DealCards(1);
-		for (Card* c : tmpCards)
-		{
-			p.hand.push_back(c);
-			std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
-		}
+void Virus::Infect(Player &p, Card* c, int playerToAffect, int idCardToAffect)
+{
+	// Infect the card
+	switch (c->state)
+	{
+	case Card::EOrganState::NONE:
+		c->state = Card::EOrganState::INFECTED;
+		break;
+	case Card::EOrganState::INFECTED:
+		// If it was infected before, then dies
+		p.maze->discardDeck.push(c); // This add the card to the discard deck
+		p.otherPlayedCards.at(playerToAffect).erase(p.otherPlayedCards.at(playerToAffect).begin() + idCardToAffect); // This deletes the card from the table
+		break;
+	case Card::EOrganState::VACUNATED:
+		c->state = Card::EOrganState::NONE;
+		break;
+	default:
+		break;
+	}
+}
+
+void Virus::InfectMe(Player& p, Card* c, int idCardToAffect)
+{
+	// Infect the card
+	switch (c->state)
+	{
+	case Card::EOrganState::NONE:
+		c->state = Card::EOrganState::INFECTED;
+		break;
+	case Card::EOrganState::INFECTED:
+		// If it was infected before, then dies
+		p.maze->discardDeck.push(c); // This add the card to the discard deck
+		p.playedCards.erase(p.playedCards.begin() + idCardToAffect); // This deletes the card from the table
+		break;
+	case Card::EOrganState::VACUNATED:
+		c->state = Card::EOrganState::NONE;
+		break;
+	default:
+		break;
 	}
 }

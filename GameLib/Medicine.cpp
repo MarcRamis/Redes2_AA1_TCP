@@ -39,32 +39,27 @@ void Medicine::Draw()
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 }
 
-void Medicine::Play(Player& p, Card* cardToEffect, int id)
-{
-}
-
 void Medicine::VacunateOrgan(Player& p, int idCardToAffect, int id)
 {
-	// Vacunate the card
-	// If it was vacunated before, then immunize
-	if (p.playedCards.at(idCardToAffect)->state == Card::EOrganState::VACUNATED) {
-		p.playedCards.at(idCardToAffect)->state = Card::EOrganState::IMMUNIZED; // immunize card
-	}
-	else
-	{
-		p.playedCards.at(idCardToAffect)->state = Card::EOrganState::VACUNATED; // vacunate card
-	}
+	Vacunate(p.playedCards.at(idCardToAffect));
+	p.maze->DiscardCard(p,this,id);
+}
 
-	// DISCARD THE CARD USED
-	// Add to discard cards
-	p.maze->discardDeck.push(this);
-	// Delete from the hand
-	p.hand.erase(p.hand.begin() + id);
-	// Draw new card
-	std::vector<Card*> tmpCards = p.maze->DealCards(1);
-	for (Card* c : tmpCards)
+void Medicine::Vacunate(Card* c)
+{
+	// Vacunate the card
+	switch (c->state)
 	{
-		p.hand.push_back(c);
-		std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
+	case Card::EOrganState::NONE:
+		c->state = Card::EOrganState::VACUNATED;
+		break;
+	case Card::EOrganState::VACUNATED:
+		c->state = Card::EOrganState::IMMUNIZED;
+		break;
+	case Card::EOrganState::INFECTED:
+		c->state = Card::EOrganState::NONE;
+		break;
+	default:
+		break;
 	}
 }

@@ -39,9 +39,8 @@ public:
 
 	Player();
 	~Player();
-	
-	int FindPlayerInOtherIdPlayers(int id);
 
+	int FindPlayerInOtherIdPlayers(int id);
 	// Iterators find positions in containers by id card
 	
 	// CARDS
