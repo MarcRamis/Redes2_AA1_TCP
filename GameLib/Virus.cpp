@@ -80,6 +80,7 @@ void Virus::InfectMe(Player& p, Card* c, int idCardToAffect)
 		break;
 	case Card::EOrganState::INFECTED:
 		// If it was infected before, then dies
+		c->state = Card::EOrganState::NONE;
 		p.maze->discardDeck.push(c); // This add the card to the discard deck
 		p.playedCards.erase(p.playedCards.begin() + idCardToAffect); // This deletes the card from the table
 		break;

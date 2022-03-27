@@ -3,6 +3,7 @@
 #include <vector>
 #include <stack>
 #include <queue>
+#include <string>
 
 #include "TcpSocket.h"
 #include "Player.h"
@@ -40,5 +41,5 @@ public:
 	Card *GetCardFromSelectedCard(Player& player, int selection);
 
 	bool OrganAlreadyExistsInTable(Player& player, Card* c);
-	bool CardIsTheSameType(Player& player, Card* c, Card* c2);
+	bool CardVirusIsTheSameType(Player& player, Card* c, Card* c2);
 };
