@@ -264,7 +264,7 @@ void Protocol::Peer::ReceivedLatexGlove(std::vector<TcpSocket*>* _clientes, Inpu
 	// Discard the card used
 	p.maze->DiscardOtherCard(p, p.otherhands.at(j).at(idCardPlayed), j, idCardPlayed);
 	
-	// Draw 3 cards because all hands have been discarded
+	// Draw 3 cards because all hands have been discarded & now they have to draw in order of his turn on gameTurn
 	bool allDraw = false;
 	bool meDraw = false;
 	bool doOnceMe = false;
