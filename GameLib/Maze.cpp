@@ -50,42 +50,42 @@ Maze::Maze()
 	counter++;
 
 	// CREAR CARTAS DE VIRUS
-	//for (int i = 0; i < 4; i++)
-	//{
-	//	for(int j = 0; j < 4; j++)
-	//	{
-	//		switch (i)
-	//		{
-	//		case 0:
-	//			card = new Virus(Virus::EVirusType::VIRUSHEART);
-	//			card->id = counter;
-	//			tmpDeck.push_back(card);
-	//			break;
-	//		case 1:
-	//			card = new Virus(Virus::EVirusType::VIRUSSTOMACH);
-	//			card->id = counter;
-	//			tmpDeck.push_back(card);
-	//			break;
-	//		case 2:
-	//			card = new Virus(Virus::EVirusType::VIRUSBRAIN);
-	//			card->id = counter;
-	//			tmpDeck.push_back(card);
-	//			break;
-	//		case 3:
-	//			card = new Virus(Virus::EVirusType::VIRUSBONE);
-	//			card->id = counter;
-	//			tmpDeck.push_back(card);
-	//			break;
-	//		}
-	//		counter++;
-	//	}
-	//}
-	//card = new Virus(Virus::EVirusType::VIRUSJOKER);
-	//card->id = counter;
-	//tmpDeck.push_back(card);
-	//counter++;
-	//
-	//// CREAR CARTAS DE MEDICINAS
+	for (int i = 0; i < 4; i++)
+	{
+		for(int j = 0; j < 4; j++)
+		{
+			switch (i)
+			{
+			case 0:
+				card = new Virus(Virus::EVirusType::VIRUSHEART);
+				card->id = counter;
+				tmpDeck.push_back(card);
+				break;
+			case 1:
+				card = new Virus(Virus::EVirusType::VIRUSSTOMACH);
+				card->id = counter;
+				tmpDeck.push_back(card);
+				break;
+			case 2:
+				card = new Virus(Virus::EVirusType::VIRUSBRAIN);
+				card->id = counter;
+				tmpDeck.push_back(card);
+				break;
+			case 3:
+				card = new Virus(Virus::EVirusType::VIRUSBONE);
+				card->id = counter;
+				tmpDeck.push_back(card);
+				break;
+			}
+			counter++;
+		}
+	}
+	card = new Virus(Virus::EVirusType::VIRUSJOKER);
+	card->id = counter;
+	tmpDeck.push_back(card);
+	counter++;
+	
+	// CREAR CARTAS DE MEDICINAS
 	//for (int i = 0; i < 5; i++)
 	//{
 	//	for (int j = 0; j < 4; j++)
@@ -245,4 +245,35 @@ void Maze::DiscardAllOtherHandCards(Player& p)
 	{
 		p.otherhands.at(i).clear();
 	}
+}
+
+void Maze::DiscardAllOtherHandCards(Player& p, int playerThatUsedCard)
+{
+	for (int i = 0; i < p.otherhands.size(); i++)
+	{
+		if (i != playerThatUsedCard)
+		{
+			for (int j = 0; j < p.otherhands.at(i).size(); j++)
+			{
+				discardDeck.push(p.otherhands.at(i).at(j));
+			}
+		}
+	}
+	for (int i = 0; i < p.otherhands.size(); i++)
+	{
+		if (i != playerThatUsedCard)
+		{
+			p.otherhands.at(i).clear();
+		}
+	}
+}
+
+void Maze::DiscardAllHandCards(Player& p)
+{
+	for (auto c : p.hand)
+	{
+		discardDeck.push(c);
+	}
+
+	p.hand.clear();
 }

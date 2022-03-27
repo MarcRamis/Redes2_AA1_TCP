@@ -26,5 +26,7 @@ public:
 	void FillDeck(std::vector<Card*> deck);
 	void DiscardCard(Player& p, Card* c, int id);
 	void DiscardOtherCard(Player& p, Card* c, int i, int id);
-	void DiscardAllOtherHandCards(Player &p);
+	void DiscardAllOtherHandCards(Player& p);
+	void DiscardAllOtherHandCards(Player& p, int playerThatUsedCard);
+	void DiscardAllHandCards(Player &p);
 };

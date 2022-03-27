@@ -238,7 +238,9 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 					break;
 				case Treatment::ETreatmentType::LATEXGLOVE:
 					player.hand.at(selection - 1)->GetTreatmentCard()->PlayLatexGlove(player,selection - 1);
+					Protocol::Peer::SendLatexGlove(_clientes, player.id, selection - 1, gameTurn); // send protocol to modify other players 
 					endTurn = !endTurn;
+					latexGloveEnd = true;
 					break;
 				case Treatment::ETreatmentType::MEDICALERROR:
 					break;
@@ -280,7 +282,21 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			}
 			if (!endTurn)
 			{
-				NextTurn(_clientes, player);
+				if (latexGloveEnd)
+				{
+					for (int i = 0; i < _clientes->size() + 1; i++)
+					{
+						NextTurnGlove(_clientes, player);
+					}
+					
+					ConsoleWait(2000.f);
+					DrawGame(_clientes, player);
+					latexGloveEnd = false;
+				}
+				else
+				{
+					NextTurn(_clientes, player);
+				}
 			}
 			
 		}
@@ -364,6 +380,11 @@ void Game::NextTurn(std::vector<TcpSocket*>* _clientes, Player& player)
 	else gameTurn = 0;
 
 	DrawGame(_clientes, player);
+}
+void Game::NextTurnGlove(std::vector<TcpSocket*>* _clientes, Player& player)
+{
+	if (gameTurn != _clientes->size()) gameTurn++;
+	else gameTurn = 0;
 }
 
 void Game::SetTurn(std::vector<TcpSocket*>* _clientes, Player& player)
