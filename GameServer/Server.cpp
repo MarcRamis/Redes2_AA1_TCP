@@ -14,7 +14,7 @@
 
 std::mutex mtxConexiones;
 
-void JoinGame(Match tempGame, std::map<std::string, Match>* games, TcpSocket* client, std::vector <TcpSocket*>* _clientes, Selector selector, int it)
+void JoinGame(Match tempGame, std::map<std::string, Match>* games, TcpSocket* client, std::vector <TcpSocket*>* _clientes, Selector &selector, int it)
 {
 	OutputMemoryStream sendPacket;
 	Port tmpPort;
@@ -47,23 +47,24 @@ void JoinGame(Match tempGame, std::map<std::string, Match>* games, TcpSocket* cl
 			}
 			break;
 		}
-		if (!foundGame)
-		{
-			std::string errorTxt = "Game could't be found";
-
-			sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::ERROR));
-			sendPacket.WriteString(errorTxt);
-			client->Send(sendPacket);
-		}
-		else
-		{
-			_clientes->erase(_clientes->begin() + it);
-			selector.Remove(client);
-			client->Disconnect();
-			delete client;
-			it--;
-		}
 	}
+	if (!foundGame)
+	{
+		std::string errorTxt = "Game could't be found";
+
+		sendPacket.Write(static_cast<int>(Protocol::BSS_PEERProtocol::ERROR));
+		sendPacket.WriteString(errorTxt);
+		client->Send(sendPacket);
+	}
+	else
+	{
+		_clientes->erase(_clientes->begin() + it);
+		selector.Remove(client);
+		client->Disconnect();
+		delete client;
+		it--;
+	}
+
 }
 
 void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<std::string,Match>* games)
@@ -129,7 +130,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<std::string,Ma
 							{
 							case Protocol::PEER_BSSProtocol::CREATEMATCH:
 								
-								std::cout << "Creando juego" << std::endl;
+								std::cout << "Creating game" << std::endl;
 
 								tempGame.name = packet.ReadString(); // Save game name
 								
@@ -213,6 +214,7 @@ void ControlServidor(std::vector<TcpSocket*>* _clientes, std::map<std::string,Ma
 									}
 								}
 								break;
+
 							case Protocol::PEER_BSSProtocol::ACK_PWD:
 
 								tempGame.name = packet.ReadString();
