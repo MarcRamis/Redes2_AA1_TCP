@@ -2,7 +2,7 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	while (!WinCondition(_clientes, player))
+	while (!gameEnd && !WinCondition(_clientes,player))
 	{
 		if (gameTurn == player.idTurn)
 		{
@@ -204,14 +204,17 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 					std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
 					std::cin >> selectionToAffect;
 
-					if (!CardMedicineIsTheSameType(player, player.hand.at(selection - 1), player.FindCardbyIDCardInPlayedCards(selectionToAffect)))
+					if (selectionToAffect != -1)
 					{
-						std::cout << "That's not a valid card" << std::endl;
-					}
-					else
-					{
-						std::cout << "Valid card" << std::endl;
-						break;
+						if (!CardMedicineIsTheSameType(player, player.hand.at(selection - 1), player.FindCardbyIDCardInPlayedCards(selectionToAffect)))
+						{
+							std::cout << "That's not a valid card" << std::endl;
+						}
+						else
+						{
+							std::cout << "Valid card" << std::endl;
+							break;
+						}
 					}
 
 				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
@@ -255,15 +258,19 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 					std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
 					std::cin >> selectionToAffect;
 					
-					if (!CardVirusIsTheSameType(player, player.hand.at(selection - 1), GetCardFromSelectedCard(player, selectionToAffect)))
+					if (selectionToAffect != -1)
 					{
-						std::cout << "That's not a valid card" << std::endl;
+						if (!CardVirusIsTheSameType(player, player.hand.at(selection - 1), GetCardFromSelectedCard(player, selectionToAffect)))
+						{
+							std::cout << "That's not a valid card" << std::endl;
+						}
+						else
+						{
+							std::cout << "Valid card" << std::endl;
+							break;
+						}
 					}
-					else
-					{
-						std::cout << "Valid card" << std::endl;
-						break;
-					}
+
 					
 				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1 );
 				
@@ -485,28 +492,28 @@ bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player player)
 		Protocol::Peer::YouLost(_clientes);
 		return true;
 	}
-	else
-	{
-		// Check if other players have won
-		for (int i = 0; i < player.otherPlayedCards.size(); i++)
-		{
-			tmpAmmount = 0;
-			for (int j = 0; j < player.otherPlayedCards.at(i).size(); j++)
-			{
-				Card tempCard = *player.otherPlayedCards.at(i).at(j);
+	//else
+	//{
+	//	// Check if other players have won
+	//	for (int i = 0; i < player.otherPlayedCards.size(); i++)
+	//	{
+	//		tmpAmmount = 0;
+	//		for (int j = 0; j < player.otherPlayedCards.at(i).size(); j++)
+	//		{
+	//			Card tempCard = *player.otherPlayedCards.at(i).at(j);
 
-				if (tempCard.cardType == Card::EType::ORGAN && tempCard.state != Card::EOrganState::INFECTED)
-				{
-					tmpAmmount++;
-				}
-			}
-			//std::cout << "Other: " << tmpAmmount << std::endl;
-			if (tmpAmmount == 4)
-			{
-				return true;
-			}
-		}
-	}
+	//			if (tempCard.cardType == Card::EType::ORGAN && tempCard.state != Card::EOrganState::INFECTED)
+	//			{
+	//				tmpAmmount++;
+	//			}
+	//		}
+	//		//std::cout << "Other: " << tmpAmmount << std::endl;
+	//		if (tmpAmmount == 4)
+	//		{
+	//			return true;
+	//		}
+	//	}
+	//}
 
 	return false;
 }

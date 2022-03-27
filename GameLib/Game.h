@@ -18,6 +18,7 @@ class Game
 {
 public:
 
+	bool gameEnd = false;
 	int gameTurn;
 	bool canChat;
 	bool gameStart;

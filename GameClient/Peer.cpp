@@ -333,6 +333,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 
 								case Protocol::PEER_PEERProtocol::YOULOST:
 
+									game.gameEnd = true;
 									std::cout << "You lost, bastard..." << std::endl;
 									std::cout << "You should take a look at this guy, he plays well ---> https://www.youtube.com/watch?v=7iiE-cE03So" << std::endl;
 
