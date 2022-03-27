@@ -2,7 +2,7 @@
 
 void Game::LoopGame(std::vector<TcpSocket*>* _clientes, Player& player)
 {
-	while (!gameEnd && !WinCondition(_clientes,player))
+	while (!gameEnd && !WinCondition(_clientes, player))
 	{
 		if (gameTurn == player.idTurn)
 		{
@@ -119,7 +119,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 			std::cout << std::endl;
 		}
 	}
-	
+
 	// HUD --> (DECK WHERE DRAW)
 	ConsoleXY(HUD_MAX_POS_GAME_X + 20, 0);
 	ConsoleSetColor(ConsoleColor::DARKYELLOW, ConsoleColor::BLACK);
@@ -138,7 +138,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 		countRow++;
 		printDiscardDeck.pop();
 	}
-	
+
 	// HUD --> (MY HAND)
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 	ConsoleXY(0, HUD_MAX_POS_GAME_Y + 2);
@@ -165,7 +165,7 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 {
 	bool endTurn = true;
-	Card *tmpCard = new Card();
+	Card* tmpCard = new Card();
 	int selection = 0;
 	int selectionToAffect = 0;
 
@@ -185,7 +185,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 			switch (player.hand.at(selection - 1)->cardType)
 			{
 			case Card::EType::ORGAN:
-				
+
 				if (OrganAlreadyExistsInTable(player, player.hand.at(selection - 1)))
 				{
 					std::cout << "This card is already played" << std::endl;
@@ -234,13 +234,51 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				switch (player.hand.at(selection - 1)->GetTreatmentCard()->type)
 				{
 				case Treatment::ETreatmentType::INFECTION:
+					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
+					{
+
+					}
+					else {
+						std::cout << "This card is immunized" << std::endl;
+					}
 					break;
 				case Treatment::ETreatmentType::ORGANTHIEF:
+
+					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
+					{	 
+						//do {
+						//	std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
+						//	std::cin >> selectionToAffect;
+						//
+						//} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
+						//
+						//if (OrganAlreadyExistsInTable(player, player.hand.at(selection - 1)))
+						//{
+						//	std::cout << "This card is already played" << std::endl;
+						//}
+						//else
+						//{
+						//	player.hand.at(selection - 1)->Play(player, nullptr, selection - 1);
+						//	//Protocol::Peer::SendPlayOrgan(_clientes, player.id, selection - 1); // send protocol to modify other players 
+						//	endTurn = !endTurn;
+						//}
+					}
+					else {
+						std::cout << "This card is immunized" << std::endl;
+					}
+
 					break;
 				case Treatment::ETreatmentType::TRASPLANT:
+					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
+					{
+
+					}
+					else {
+						std::cout << "This card is immunized" << std::endl;
+					}
 					break;
 				case Treatment::ETreatmentType::LATEXGLOVE:
-					player.hand.at(selection - 1)->GetTreatmentCard()->PlayLatexGlove(player,selection - 1);
+					player.hand.at(selection - 1)->GetTreatmentCard()->PlayLatexGlove(player, selection - 1);
 					Protocol::Peer::SendLatexGlove(_clientes, player.id, selection - 1, gameTurn); // send protocol to modify other players 
 					endTurn = !endTurn;
 					latexGloveEnd = true;
@@ -257,7 +295,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				do {
 					std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
 					std::cin >> selectionToAffect;
-					
+
 					if (selectionToAffect != -1)
 					{
 						if (!CardVirusIsTheSameType(player, player.hand.at(selection - 1), GetCardFromSelectedCard(player, selectionToAffect)))
@@ -271,9 +309,9 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 						}
 					}
 
-					
-				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1 );
-				
+
+				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
+
 				if (selectionToAffect != -1) {
 					if (CardVirusIsTheSameType(player, player.hand.at(selection - 1), GetCardFromSelectedCard(player, selectionToAffect)))
 					{
@@ -282,7 +320,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 						endTurn = !endTurn;
 					}
 				}
-				
+
 				break;
 			default:
 				break;
@@ -295,7 +333,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 					{
 						NextTurnGlove(_clientes, player);
 					}
-					
+
 					ConsoleWait(2000.f);
 					DrawGame(_clientes, player);
 					latexGloveEnd = false;
@@ -305,9 +343,9 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 					NextTurn(_clientes, player);
 				}
 			}
-			
+
 		}
-		else 
+		else
 		{
 			selectionToAffect = 0;
 			do {
@@ -336,9 +374,9 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 
 				NextTurn(_clientes, player);
 			}
-			
+
 		}
-	
+
 	}
 	DrawGame(_clientes, player);
 }
@@ -353,7 +391,7 @@ void Game::PlayerDisconnected(std::vector<TcpSocket*>* _clientes, Player& player
 	{
 		player.maze->discardDeck.push(player.otherhands.at(i).at(j));
 	}
-	
+
 	int tmpTurnPlayerDisconnected = player.idOtherTurns.at(i);
 
 	player.otherhands.erase(player.otherhands.begin() + i);
@@ -371,7 +409,7 @@ void Game::PlayerDisconnected(std::vector<TcpSocket*>* _clientes, Player& player
 			player.idOtherTurns.at(turn)--;
 		}
 	}
-	
+
 	if (gameTurn == tmpTurnPlayerDisconnected && gameTurn == _clientes->size())
 	{
 		if (gameTurn != _clientes->size()) gameTurn++;
@@ -538,7 +576,7 @@ bool Game::CorrectIdCardInTable(int selection, Player& player)
 			}
 		}
 	}
-	
+
 	return false;
 }
 
@@ -588,7 +626,7 @@ Card* Game::GetCardFromSelectedCard(Player& player, int selection)
 	return nullptr;
 }
 
-bool Game::OrganAlreadyExistsInTable(Player& player, Card *c)
+bool Game::OrganAlreadyExistsInTable(Player& player, Card* c)
 {
 	for (int i = 0; i < player.playedCards.size(); i++)
 	{
@@ -631,7 +669,7 @@ bool Game::CardVirusIsTheSameType(Player& player, Card* c, Card* c2)
 			}
 		}
 	}
-	
+
 	return false;
 }
 
@@ -679,10 +717,10 @@ void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	srand(player.randomSeed);
 
 	player.maze = new Maze();
-	
+
 	// DEAL INITIAL CARDS
 	player.otherPlayedCards.resize(_clientes->size());
-	
+
 	for (int i = 0; i < _clientes->size() + 1; i++)
 	{
 		if (i == player.idTurn)
@@ -698,10 +736,10 @@ void Game::StartGame(std::vector<TcpSocket*>* _clientes, Player& player)
 			player.otherhands.push_back(cards);
 		}
 	}
-	
+
 	SetTurn(_clientes, player); // SET NEW TURN
 	DrawGame(_clientes, player);
-	
+
 	// UPDATE - LOOP GAME
 	LoopGame(_clientes, player);
 }
