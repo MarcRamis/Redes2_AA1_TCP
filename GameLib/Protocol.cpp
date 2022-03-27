@@ -123,16 +123,6 @@ void Protocol::Peer::ReceivedOrganInfected(std::vector<TcpSocket*>* _clientes, I
 		int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
 		int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard);
 		
-		
-		//p.playedCards.at(id_card)->GetVirusCard()->Infect(p, p.otherPlayedCards.at(id_player).at(id_card), id_player, id_card);
-		//p.maze->DiscardOtherCard(p, p.otherhands.at(i).at(idCardPlayed), i, idCardPlayed);
-
-		// Infect 
-		// If it was infected before, then dies
-		//if (p.otherPlayedCards.at(id_player).at(id_card)->state != Card::EOrganState::IMMUNIZED) {
-		//
-		//}
-
 		p.otherPlayedCards.at(id_player).at(id_card)->GetVirusCard()->Infect(p, p.otherPlayedCards.at(id_player).at(id_card), id_player, id_card);
 		p.maze->DiscardOtherCard(p, p.otherhands.at(i).at(idCardPlayed), i, idCardPlayed);
 	}
@@ -160,116 +150,16 @@ void Protocol::Peer::ReceivedMedicineCard(std::vector<TcpSocket*>* _clientes, In
 {
 	// Read all ids
 	int idPlayerThatUsedCard = 0; int idCardPlayed = 0;
-	int idPlayerAffected = 0; int idCardFromPlayerAffected = 0;
+	int idCardFromPlayerAffected = 0;
 	pack.Read(&idPlayerThatUsedCard); pack.Read(&idCardPlayed); // receive player & card id used
 	pack.Read(&idCardFromPlayerAffected); // receive player & card id who affect this card
-
-	std::cout << "Player that used card: " << idPlayerThatUsedCard << std::endl;
-	std::cout << "Player affected: " << idPlayerAffected << std::endl;
-	std::cout << "Card used: " << idCardPlayed << std::endl;
-	std::cout << "Card affected: " << idCardFromPlayerAffected << std::endl << std::endl;
-
-	std::cout << "My id: " << p.id << std::endl;
-
-	// search if the player is me
-	int id_card = p.FindPositionCardbyIDCardInPlayedCards(idCardFromPlayerAffected);
-	std::cout << "Posicion de la carta en contenedor: " << id_card << std::endl;;
-
-	if (id_card != -1)
-	{
-		// Vacunate
-		if (p.playedCards.at(id_card)->state == Card::EOrganState::VACUNATED) {
-			p.playedCards.at(id_card)->state = Card::EOrganState::IMMUNIZED; // immunize card
-		}
-		else
-		{
-			p.playedCards.at(id_card)->state = Card::EOrganState::VACUNATED; // vacunate card
-		}
-		
-		// discard the card used
-		for (int i = 0; i < p.idOtherPlayers.size(); i++)
-		{
-			if (p.idOtherPlayers.at(i) == idPlayerThatUsedCard)
-			{
-				// Discard card used
-				// Add the card played for other player & erase from his hand, also he needs to draw a new one
-				p.maze->discardDeck.push(p.otherhands.at(i).at(idCardPlayed));
-				p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
-				std::vector<Card*> tmpCards = p.maze->DealCards(1);
-				for (Card* c : tmpCards)
-				{
-					p.otherhands.at(i).push_back(c);
-				}
-				break;
-			}
-		}
-	}
-	else
-	{
-		id_card = p.FindPositionCardbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
-		int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
 	
-		std::cout << "Posicion de la carta en contenedor: " << id_card << std::endl;;
-		std::cout << "Posicion del player en contenedor: " << id_player << std::endl;;
-		
-		// Vacunate 
-		// If it was infected before, then dies
-		if (p.otherPlayedCards.at(id_player).at(id_card)->state == Card::EOrganState::VACUNATED) {
-			p.otherPlayedCards.at(id_player).at(id_player)->state = Card::EOrganState::IMMUNIZED; // here i'm just infecting the card
-		}
-		else
-		{
-			p.otherPlayedCards.at(id_player).at(id_player)->state = Card::EOrganState::VACUNATED; // here i'm just infecting the card
-		}
-	
-		for (int i = 0; i < p.idOtherPlayers.size(); i++)
-		{
-			if (p.idOtherPlayers.at(i) == idPlayerThatUsedCard)
-			{
-				p.maze->discardDeck.push(p.otherhands.at(i).at(idCardPlayed));
-				p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
-				std::vector<Card*> tmpCards = p.maze->DealCards(1);
-				for (Card* c : tmpCards)
-				{
-					p.otherhands.at(i).push_back(c);
-				}
-			}
-		}
-	
-	}
+	int id_card = p.FindPositionCardbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+	int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+	int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard);
 
-	//int id_card = p.FindPositionCardbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
-	//int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
-	//int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard);
-	//
-	//std::cout << "Posicion de la carta en contenedor: " << id_card << std::endl;
-	//std::cout << "Posicion del player en contenedor: " << id_player << std::endl;
-	//std::cout << "Posicion del jugador que ha usado la carta: " << id_player << std::endl;
-	//
-	//// Vacunate 
-	//// If it was infected before, then dies
-	//if (p.otherPlayedCards.at(id_player).at(id_card)->state == Card::EOrganState::VACUNATED) {
-	//	p.otherPlayedCards.at(id_player).at(id_player)->state = Card::EOrganState::IMMUNIZED; // here i'm just infecting the card
-	//}
-	//else
-	//{
-	//	p.otherPlayedCards.at(id_player).at(id_player)->state = Card::EOrganState::VACUNATED; // here i'm just infecting the card
-	//}
-	//
-	////for (int i = 0; i < p.idOtherPlayers.size(); i++)
-	////{
-	////	if (p.idOtherPlayers.at(i) == idPlayerThatUsedCard)
-	////	{
-	////
-	////	}
-	////}
-	//p.maze->discardDeck.push(p.otherhands.at(i).at(idCardPlayed));
-	//p.otherhands.at(i).erase(p.otherhands.at(i).begin() + idCardPlayed);
-	//std::vector<Card*> tmpCards = p.maze->DealCards(1);
-	//for (Card* c : tmpCards)
-	//{
-	//	p.otherhands.at(i).push_back(c);
-	//}
+	p.otherPlayedCards.at(id_player).at(id_card)->GetMedicineCard()->Vacunate(p.otherPlayedCards.at(id_player).at(id_card));
+	p.maze->DiscardOtherCard(p, p.otherhands.at(i).at(idCardPlayed), i, idCardPlayed);
 }
 
 void Protocol::Peer::SendDiscardCard(std::vector<TcpSocket*>* _clientes, int idPlayerThatDiscard, int numberCards)

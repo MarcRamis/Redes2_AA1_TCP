@@ -6,6 +6,7 @@
 
 #include "Organ.h"
 #include "Virus.h"
+#include "Medicine.h"
 
 class Protocol
 {
