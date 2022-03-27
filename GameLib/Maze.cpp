@@ -5,6 +5,7 @@
 #include "Medicine.h"
 #include "Treatment.h"
 
+#include "Player.h"
 
 Maze::Maze()
 {
@@ -199,5 +200,34 @@ void Maze::FillDeck(std::vector<Card*> tmpDeck)
 	for (int i = 0; i < tmpDeck.size(); i++)
 	{
 		deck.push(tmpDeck[i]);
+	}
+}
+
+void Maze::DiscardCard(Player& p, Card *c, int id)
+{
+	// DISCARD THE CARD USED
+// Add to discard cards
+	p.maze->discardDeck.push(c);
+	// Delete from the hand
+	p.hand.erase(p.hand.begin() + id);
+	// Draw new card
+	std::vector<Card*> tmpCards = p.maze->DealCards(1);
+	for (Card* c : tmpCards)
+	{
+		p.hand.push_back(c);
+		std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
+	}
+}
+
+void Maze::DiscardOtherCard(Player& p, Card* c, int i, int id)
+{
+	// Discard card used
+	// Add the card played for other player & erase from his hand, also he needs to draw a new one
+	p.maze->discardDeck.push(p.otherhands.at(i).at(id));
+	p.otherhands.at(i).erase(p.otherhands.at(i).begin() + id);
+	std::vector<Card*> tmpCards = p.maze->DealCards(1);
+	for (Card* c : tmpCards)
+	{
+		p.otherhands.at(i).push_back(c);
 	}
 }

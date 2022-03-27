@@ -4,6 +4,9 @@
 #include "Player.h"
 #include <string>
 
+#include "Organ.h"
+#include "Virus.h"
+
 class Protocol
 {
 public:
