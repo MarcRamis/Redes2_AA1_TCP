@@ -37,6 +37,11 @@ Medicine* Card::GetMedicineCard()
     return dynamic_cast<Medicine*>(this);
 }
 
+Treatment* Card::GetTreatmentCard()
+{
+    return dynamic_cast<Treatment*>(this);
+}
+
 Card::Card()
 {
 }

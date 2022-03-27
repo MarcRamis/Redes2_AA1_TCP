@@ -222,3 +222,122 @@ void Protocol::Peer::YouLost(std::vector<TcpSocket*>* _clientes)
 		}
 	}
 }
+
+void Protocol::Peer::SendLatexGlove(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed, int gameTurn)
+{
+	OutputMemoryStream pack;
+	for (int i = 0; i < _clientes->size(); i++)
+	{
+		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::LATEXGLOVE));
+
+		pack.Write(idPlayerThatUsedCard); pack.Write(idCardPlayed); // id player that used a card & the position of his card
+		pack.Write(gameTurn); // game turn
+
+		Status status = _clientes->at(i)->Send(pack);
+		if (status.GetStatus() != Status::EStatusType::DONE)
+		{
+			std::cout << "El mensaje Peer2Peer no se ha enviado: [ No se ha enviado la carta jugada ]" << std::endl;
+		}
+	}
+}
+
+void Protocol::Peer::ReceivedLatexGlove(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p)
+{
+	// Read all ids
+	int idPlayerThatUsedCard = 0; int idCardPlayed = 0; int gameTurn = 0;
+	pack.Read(&idPlayerThatUsedCard); pack.Read(&idCardPlayed);
+	pack.Read(&gameTurn);
+
+	// Discard all my cards
+	p.maze->DiscardAllHandCards(p);
+	
+	// Discard all the cards in the hand of other players
+	int j = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard);
+	for (int i = 0; i < p.otherPlayedCards.size(); i++)
+	{
+		if (i != j)
+		{
+			p.maze->DiscardAllOtherHandCards(p, j);
+		}
+	}
+
+	// Discard the card used
+	p.maze->DiscardOtherCard(p, p.otherhands.at(j).at(idCardPlayed), j, idCardPlayed);
+	
+	// Draw 3 cards because all hands have been discarded
+	bool allDraw = false;
+	bool meDraw = false;
+	bool doOnceMe = false;
+	std::vector<bool> otherPlayerDraw(_clientes->size(), false);
+	std::vector<bool> otherdoOnce(_clientes->size(), false);
+	std::vector<bool> allPlayerDraw;
+	
+	while(!allDraw)
+	{
+		if (gameTurn == p.idTurn)
+		{
+			if (!meDraw)
+			{
+				std::vector<Card*> tmpCards1 = p.maze->DealCards(3);
+				for (Card* c : tmpCards1)
+				{
+					p.hand.push_back(c);
+					std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
+				}
+				meDraw = true;
+			}
+			if (gameTurn != _clientes->size()) gameTurn++;
+			else gameTurn = 0;
+		}
+		else
+		{
+			for (int i = 0; i < p.idOtherTurns.size(); i++)
+			{
+				if (gameTurn == p.idOtherTurns.at(i))
+				{
+					if (i != j)
+					{
+						if (!otherPlayerDraw.at(i))
+						{
+							std::vector<Card*> tmpCards = p.maze->DealCards(3);
+							for (Card* c : tmpCards)
+							{
+								p.otherhands.at(i).push_back(c);
+							}
+							otherPlayerDraw.at(i) = true;
+						}
+					}
+					if (gameTurn != _clientes->size()) gameTurn++;
+					else gameTurn = 0;
+				}
+			}
+		}
+
+		if (meDraw) {
+			if (!doOnceMe)
+			{
+				allPlayerDraw.push_back(meDraw);
+				doOnceMe = true;
+			}
+		}
+		// for para saber si todos siguen en falso
+		for (int i = 0; i < otherPlayerDraw.size(); i++)
+		{
+			if (i != j)
+			{
+				if (otherPlayerDraw.at(i))
+				{
+					if (!otherdoOnce.at(i))
+					{
+						allPlayerDraw.push_back(otherPlayerDraw.at(i));
+						otherdoOnce.at(i) = true;
+					}
+				}
+			}
+		}
+		if (allPlayerDraw.size() == _clientes->size())
+		{
+			allDraw = true;
+		}
+	}
+}

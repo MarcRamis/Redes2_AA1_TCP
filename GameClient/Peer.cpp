@@ -318,7 +318,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									
 									Protocol::Peer::ReceivedPlayedOrgan(_clientes,packet, player);
 									game.NextTurn(_clientes,player);
-
+									
 									break;
 								case Protocol::PEER_PEERProtocol::INFECTORGAN:
 									
@@ -346,6 +346,18 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									Protocol::Peer::ReceivedMedicineCard(_clientes, packet, player);
 									game.NextTurn(_clientes, player);
 
+									break;
+								case Protocol::PEER_PEERProtocol::LATEXGLOVE:
+									
+									Protocol::Peer::ReceivedLatexGlove(_clientes, packet, player);
+									for (int i = 0; i < _clientes->size() + 1; i++)
+									{
+										game.NextTurnGlove(_clientes, player);
+									}
+
+									ConsoleWait(2000.f);
+									game.DrawGame(_clientes, player);
+									
 									break;
 								case Protocol::PEER_PEERProtocol::ISREADY:
 									game.gameReady.at(it) = true;

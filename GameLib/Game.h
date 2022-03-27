@@ -21,6 +21,7 @@ public:
 	int gameTurn;
 	bool canChat;
 	bool gameStart;
+	bool latexGloveEnd;
 	std::vector<bool> gameReady;
 	std::string gameName;
 	unsigned short localPort;
@@ -33,6 +34,7 @@ public:
 	bool WinCondition(std::vector<TcpSocket*>* _clientes, Player player);
 	bool CorrectIdCardInTable(int selection, Player& player);
 	void NextTurn(std::vector<TcpSocket*>* _clientes, Player& player);
+	void NextTurnGlove(std::vector<TcpSocket*>* _clientes, Player& player);
 	void PlayCard(std::vector<TcpSocket*>* _clientes, Player& player);
 	void PlayerDisconnected(std::vector<TcpSocket*>* _clientes, Player& player, int i);
 	

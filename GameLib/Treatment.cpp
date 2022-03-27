@@ -1,5 +1,7 @@
 #include "Treatment.h"
 
+#include "Player.h"
+
 Treatment::Treatment()
 {
 }
@@ -43,3 +45,18 @@ void Treatment::Play(Player& p, Card* cardToEffect, int id)
 {
 }
 
+void Treatment::PlayLatexGlove(Player& p, int id)
+{
+	p.maze->DiscardCard(p,this, id);
+	p.maze->DiscardAllOtherHandCards(p);
+
+	// Draw 3 cards for other players
+	for (int i = 0; i < p.otherPlayedCards.size(); i++)
+	{
+		std::vector<Card*> tmpCards = p.maze->DealCards(3);
+		for (Card* c : tmpCards)
+		{
+			p.otherhands.at(i).push_back(c);
+		}
+	}
+}
