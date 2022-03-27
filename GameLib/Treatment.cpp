@@ -60,3 +60,13 @@ void Treatment::PlayLatexGlove(Player& p, int id)
 		}
 	}
 }
+
+void Treatment::PlayTrasplant(Player& p, int id, int selfOrgan, int otherOrgan)
+{
+	Card* tempMyOrgan = p.FindCardbyIDCardInPlayedCards(selfOrgan);
+	Card* tempOtherOrgan = p.otherPlayedCards.at(p.FindPositionPlayerbyIDCardInOtherPlayedCards(otherOrgan)).at(p.FindPositionCardbyIDCardInOtherPlayedCards(otherOrgan));
+
+	p.playedCards.at(p.FindPositionCardbyIDCardInPlayedCards(selfOrgan)) = tempOtherOrgan;
+	p.otherPlayedCards.at(p.FindPositionPlayerbyIDCardInOtherPlayedCards(otherOrgan)).at(p.FindPositionCardbyIDCardInOtherPlayedCards(otherOrgan)) = tempMyOrgan;
+	p.maze->DiscardCard(p, this, id);
+}

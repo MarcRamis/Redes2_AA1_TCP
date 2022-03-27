@@ -167,6 +167,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 	bool endTurn = true;
 	Card* tmpCard = new Card();
 	int selection = 0;
+	int selfSelection = 0;
 	int selectionToAffect = 0;
 
 	while (endTurn)
@@ -234,7 +235,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				switch (player.hand.at(selection - 1)->GetTreatmentCard()->type)
 				{
 				case Treatment::ETreatmentType::INFECTION:
-					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
+					if (player.hand.at(selection - 1)->state != Card::EOrganState::IMMUNIZED)
 					{
 
 					}
@@ -244,7 +245,7 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 					break;
 				case Treatment::ETreatmentType::ORGANTHIEF:
 
-					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
+					if (player.hand.at(selection - 1)->state != Card::EOrganState::IMMUNIZED)
 					{	 
 						//do {
 						//	std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
@@ -269,13 +270,67 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 
 					break;
 				case Treatment::ETreatmentType::TRASPLANT:
-					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
+					//if (player.hand.at(selection - 1)->state != Card::EOrganState::IMMUNIZED)
 					{
+						do
+						{
+							std::cout << "Select one of your cards to trasplant: or (-1) to exit" << std::endl;
+							std::cin >> selfSelection;
 
+							if (selfSelection != -1 && player.playedCards.at(player.FindPositionCardbyIDCardInPlayedCards(selfSelection))->cardType == Card::EType::ORGAN)
+							{
+								do
+								{
+									std::cout << "Select an organ on the table: ( Any of the number next to the card ) or (-1) to exit" << std::endl;
+									std::cin >> selectionToAffect;
+
+									if (selectionToAffect != -1)
+									{
+										if (!OrganSelectedAlreadyExistsInTable(player, player.hand.at(selection - 1), player.FindCardbyIDCardInPlayedCards(selfSelection),GetCardFromSelectedCard(player, selectionToAffect)))
+										{
+											std::cout << "That's not a valid card" << std::endl;
+										}
+										else
+										{
+											std::cout << "Valid card" << std::endl;
+											break;
+										}
+									}
+									else
+									{
+										std::cout << "Wrong organ selected" << std::endl;
+									}
+
+								} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
+
+								if (!OrganSelectedAlreadyExistsInTable(player, player.hand.at(selection - 1), player.FindCardbyIDCardInPlayedCards(selfSelection), GetCardFromSelectedCard(player, selectionToAffect)))
+								{
+									break;
+								}
+
+							}
+							else
+							{
+								std::cout << "Wrong organ selected" << std::endl;
+							}
+
+						} while (!CorrectIdCardInTable(selectionToAffect, player) && selfSelection != -1 && selectionToAffect != -1);
+
+						
+
+
+						if (selectionToAffect != -1) {
+							
+							//player.hand.at(selection - 1)->InfectOrgan(player, GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect), selection - 1);
+							player.hand.at(selection - 1)->GetTreatmentCard()->PlayTrasplant(player, selection - 1, selfSelection, selectionToAffect);
+							//Protocol::Peer::SendInfectOrgan(_clientes, player.id, selection - 1, selectionToAffect); // send protocol to modify other players 
+							endTurn = !endTurn;
+							
+						}
 					}
-					else {
-						std::cout << "This card is immunized" << std::endl;
-					}
+					//else {
+					//	std::cout << "This card is immunized" << std::endl;
+					//}
 					break;
 				case Treatment::ETreatmentType::LATEXGLOVE:
 					player.hand.at(selection - 1)->GetTreatmentCard()->PlayLatexGlove(player, selection - 1);
@@ -631,6 +686,18 @@ bool Game::OrganAlreadyExistsInTable(Player& player, Card* c)
 	for (int i = 0; i < player.playedCards.size(); i++)
 	{
 		if (c->GetOrganCard()->type == player.playedCards.at(i)->GetOrganCard()->type)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Game::OrganSelectedAlreadyExistsInTable(Player& player, Card* c, Card* cSelf, Card* cOther)
+{
+	for (int i = 0; i < player.playedCards.size(); i++)
+	{
+		if (cSelf->GetOrganCard()->type != player.playedCards.at(i)->GetOrganCard()->type && player.playedCards.at(i)->GetOrganCard()->type == cOther->GetOrganCard()->type)
 		{
 			return true;
 		}

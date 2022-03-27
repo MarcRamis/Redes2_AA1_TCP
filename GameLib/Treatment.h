@@ -12,4 +12,5 @@ public:
 	void Draw();
 	void Play(Player& p, Card* cardToEffect, int id);
 	void PlayLatexGlove(Player &p, int id);
+	void PlayTrasplant(Player& p, int id, int selfOrgan, int otherOrgan);
 };

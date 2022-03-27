@@ -44,6 +44,7 @@ public:
 	Card *GetCardFromSelectedCard(Player& player, int selection);
 
 	bool OrganAlreadyExistsInTable(Player& player, Card* c);
+	bool OrganSelectedAlreadyExistsInTable(Player& player, Card* c, Card* cSelf, Card* cOther);
 	bool CardVirusIsTheSameType(Player& player, Card* c, Card* c2);
 	bool CardMedicineIsTheSameType(Player& player, Card* c, Card* c2);
 };
