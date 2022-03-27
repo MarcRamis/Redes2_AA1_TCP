@@ -23,7 +23,7 @@ public:
 	
 	enum class PEER_PEERProtocol
 	{
-		SENDMESSAGE, ACKREADYFORGAME, ISREADY, PLAYORGAN, INFECTORGAN, VACUNATEORGAN, DISCARDCARDS, YOULOST, LATEXGLOVE, NONE
+		SENDMESSAGE, ACKREADYFORGAME, ISREADY, PLAYORGAN, INFECTORGAN, VACUNATEORGAN, DISCARDCARDS, YOULOST, LATEXGLOVE, ORGANTHIEF, NONE
 	};
 
 	static struct Peer
@@ -44,6 +44,8 @@ public:
 		static void YouLost(std::vector<TcpSocket*>* _clientes);
 		static void SendLatexGlove(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed, int gameTurn);
 		static void ReceivedLatexGlove(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p);
+		static void SendOrganThief(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed, int idCardFromPlayerAffected);
+		static void ReceivedOrganThief(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p);
 	};
 	static struct Server
 	{
