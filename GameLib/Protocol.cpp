@@ -367,27 +367,27 @@ void Protocol::Peer::ReceivedOrganThief(std::vector<TcpSocket*>* _clientes, Inpu
 	pack.Read(&idPlayerThatUsedCard); pack.Read(&idCardPlayed);
 	pack.Read(&idCardFromPlayerAffected);
 	
-	// search if the player is me
-	int id_card = p.FindPositionCardbyIDCardInPlayedCards(idCardFromPlayerAffected);
-	int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard);
+	int id_card = p.FindPositionCardbyIDCardInPlayedCards(idCardFromPlayerAffected); // find player that has been affected by the card
+	int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard); // find player that used the card
 
+	// search if the player is me
 	if (id_card != -1)
 	{
-		// Push to my played cards
+		// Push to that other played cards
 		p.otherPlayedCards.at(i).push_back(p.playedCards.at(id_card));
-		// Erase from that other player 
+		// Erase to my played cards
 		p.playedCards.erase(p.playedCards.begin() + id_card);
 	}
-	//else
-	//{
-	//	id_card = p.FindPositionCardbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
-	//	int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
-	//	
-	//	// Push to the player that stole it
-	//	p.playedCards.push_back(p.otherPlayedCards.at(playerToAffect).at(idCardAffected));
-	//	// Erase from that other player that the first one stole the organ
-	//	p.otherPlayedCards.at(playerToAffect).erase(p.otherPlayedCards.at(playerToAffect).begin() + idCardAffected);
-	//}
+	else
+	{
+		id_card = p.FindPositionCardbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+		int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+		
+		// Push to the player that stole it
+		p.otherPlayedCards.at(i).push_back(p.otherPlayedCards.at(id_player).at(id_card));
+		// Erase from that other player that the first one stole the organ
+		p.otherPlayedCards.at(id_player).erase(p.otherPlayedCards.at(id_player).begin() + id_card);
+	}
 
 	// Discard the used card
 	p.maze->DiscardOtherCard(p, p.otherhands.at(i).at(idCardPlayed), i, idCardPlayed);
