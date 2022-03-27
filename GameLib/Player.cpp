@@ -62,6 +62,18 @@ int Player::FindPositionCardbyIDCardInPlayedCards(int cardID)
 	return -1;
 }
 
+Card* Player::FindCardbyIDCardInPlayedCards(int cardID)
+{
+	for (int i = 0; i < playedCards.size(); i++)
+	{
+		if (playedCards.at(i)->id == cardID)
+		{
+			return playedCards.at(i);
+		}
+	}
+	return nullptr;
+}
+
 int Player::FindPositionCardbyIDCardInOtherPlayedCards(int cardID)
 {
 	for (int i = 0; i < otherPlayedCards.size(); i++)

@@ -50,6 +50,7 @@ public:
 	
 	// Played Cards
 	int FindPositionCardbyIDCardInPlayedCards(int cardID); // My played cards
+	Card* FindCardbyIDCardInPlayedCards(int cardID); // My played cards
 	int FindPositionCardbyIDCardInOtherPlayedCards(int cardID); // Other played cards
 	
 	// PLAYER

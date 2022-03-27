@@ -42,4 +42,5 @@ public:
 
 	bool OrganAlreadyExistsInTable(Player& player, Card* c);
 	bool CardVirusIsTheSameType(Player& player, Card* c, Card* c2);
+	bool CardMedicineIsTheSameType(Player& player, Card* c, Card* c2);
 };

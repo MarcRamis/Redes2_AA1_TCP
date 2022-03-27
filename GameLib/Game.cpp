@@ -201,15 +201,28 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 
 				selectionToAffect = 0;
 				do {
-
 					std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
 					std::cin >> selectionToAffect;
+
+					if (!CardMedicineIsTheSameType(player, player.hand.at(selection - 1), player.FindCardbyIDCardInPlayedCards(selectionToAffect)))
+					{
+						std::cout << "That's not a valid card" << std::endl;
+					}
+					else
+					{
+						std::cout << "Valid card" << std::endl;
+						break;
+					}
+
 				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
 
 				if (selectionToAffect != -1) {
-					player.hand.at(selection - 1)->VacunateOrgan(player, player.FindPositionCardbyIDCardInPlayedCards(selectionToAffect), selection - 1);
-					Protocol::Peer::SendMedicineCard(_clientes, player.id, selection - 1, selectionToAffect); // send protocol to modify other players 
-					endTurn = !endTurn;
+					if (CardMedicineIsTheSameType(player, player.hand.at(selection - 1), player.FindCardbyIDCardInPlayedCards(selectionToAffect)))
+					{
+						player.hand.at(selection - 1)->VacunateOrgan(player, player.FindPositionCardbyIDCardInPlayedCards(selectionToAffect), selection - 1);
+						Protocol::Peer::SendMedicineCard(_clientes, player.id, selection - 1, selectionToAffect); // send protocol to modify other players 
+						endTurn = !endTurn;
+					}
 				}
 
 				break;
@@ -231,8 +244,8 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 						std::cout << "Valid card" << std::endl;
 						break;
 					}
-
-				} while (!CorrectIdCardInTable(selectionToAffect, player)  && selectionToAffect != -1 );
+					
+				} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1 );
 				
 				if (selectionToAffect != -1) {
 					if (CardVirusIsTheSameType(player, player.hand.at(selection - 1), GetCardFromSelectedCard(player, selectionToAffect)))
@@ -573,6 +586,41 @@ bool Game::CardVirusIsTheSameType(Player& player, Card* c, Card* c2)
 		}
 	}
 	
+	return false;
+}
+
+bool Game::CardMedicineIsTheSameType(Player& player, Card* c, Card* c2)
+{
+	if (c2->GetOrganCard()->type == Organ::EOrganType::JOKER) {
+		return true;
+	}
+	else
+	{
+		if (c->GetMedicineCard()->type == Medicine::EMedicineType::MEDICINEJOKER)
+		{
+			return true;
+		}
+		else
+		{
+			if (c->GetMedicineCard()->type == Medicine::EMedicineType::MEDICINEBONE && c2->GetOrganCard()->type == Organ::EOrganType::BONE)
+			{
+				return true;
+			}
+			if (c->GetMedicineCard()->type == Medicine::EMedicineType::MEDICINEBRAIN && c2->GetOrganCard()->type == Organ::EOrganType::BRAIN)
+			{
+				return true;
+			}
+			if (c->GetMedicineCard()->type == Medicine::EMedicineType::MEDICINEHEART && c2->GetOrganCard()->type == Organ::EOrganType::HEART)
+			{
+				return true;
+			}
+			if (c->GetMedicineCard()->type == Medicine::EMedicineType::MEDICINESTOMACH && c2->GetOrganCard()->type == Organ::EOrganType::STOMACH)
+			{
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 
