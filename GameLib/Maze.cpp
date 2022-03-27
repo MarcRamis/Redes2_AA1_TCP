@@ -50,115 +50,115 @@ Maze::Maze()
 	counter++;
 
 	// CREAR CARTAS DE VIRUS
-	for (int i = 0; i < 4; i++)
-	{
-		for(int j = 0; j < 4; j++)
-		{
-			switch (i)
-			{
-			case 0:
-				card = new Virus(Virus::EVirusType::VIRUSHEART);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 1:
-				card = new Virus(Virus::EVirusType::VIRUSSTOMACH);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 2:
-				card = new Virus(Virus::EVirusType::VIRUSBRAIN);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 3:
-				card = new Virus(Virus::EVirusType::VIRUSBONE);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			}
-			counter++;
-		}
-	}
-	card = new Virus(Virus::EVirusType::VIRUSJOKER);
-	card->id = counter;
-	tmpDeck.push_back(card);
-	counter++;
-
-	// CREAR CARTAS DE MEDICINAS
-	for (int i = 0; i < 5; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			switch (i)
-			{
-			case 0:
-				card = new Medicine(Medicine::EMedicineType::MEDICINEHEART);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 1:
-				card = new Medicine(Medicine::EMedicineType::MEDICINESTOMACH);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 2:
-				card = new Medicine(Medicine::EMedicineType::MEDICINEBRAIN);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 3:
-				card = new Medicine(Medicine::EMedicineType::MEDICINEBONE);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 4:
-				card = new Medicine(Medicine::EMedicineType::MEDICINEJOKER);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			}
-			counter++;
-		}
-	}
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	for(int j = 0; j < 4; j++)
+	//	{
+	//		switch (i)
+	//		{
+	//		case 0:
+	//			card = new Virus(Virus::EVirusType::VIRUSHEART);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 1:
+	//			card = new Virus(Virus::EVirusType::VIRUSSTOMACH);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 2:
+	//			card = new Virus(Virus::EVirusType::VIRUSBRAIN);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 3:
+	//			card = new Virus(Virus::EVirusType::VIRUSBONE);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		}
+	//		counter++;
+	//	}
+	//}
+	//card = new Virus(Virus::EVirusType::VIRUSJOKER);
+	//card->id = counter;
+	//tmpDeck.push_back(card);
+	//counter++;
+	//
+	//// CREAR CARTAS DE MEDICINAS
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	for (int j = 0; j < 4; j++)
+	//	{
+	//		switch (i)
+	//		{
+	//		case 0:
+	//			card = new Medicine(Medicine::EMedicineType::MEDICINEHEART);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 1:
+	//			card = new Medicine(Medicine::EMedicineType::MEDICINESTOMACH);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 2:
+	//			card = new Medicine(Medicine::EMedicineType::MEDICINEBRAIN);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 3:
+	//			card = new Medicine(Medicine::EMedicineType::MEDICINEBONE);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 4:
+	//			card = new Medicine(Medicine::EMedicineType::MEDICINEJOKER);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		}
+	//		counter++;
+	//	}
+	//}
 
 	//CREAR CARTAS DE TRATAMIENTOS
-	card = new Treatment(Treatment::ETreatmentType::INFECTION);
-	card->id = counter;
-	tmpDeck.push_back(card);
-	counter++;
-	card = new Treatment(Treatment::ETreatmentType::INFECTION);
-	card->id = counter;
-	tmpDeck.push_back(card);
-	counter++;
-	for (int i = 0; i < 2; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			switch (i)
-			{
-			case 0:
-				card = new Treatment(Treatment::ETreatmentType::ORGANTHIEF);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			case 1:
-				card = new Treatment(Treatment::ETreatmentType::TRASPLANT);
-				card->id = counter;
-				tmpDeck.push_back(card);
-				break;
-			}
-			counter++;
-		}
-	}
+	//card = new Treatment(Treatment::ETreatmentType::INFECTION);
+	//card->id = counter;
+	//tmpDeck.push_back(card);
+	//counter++;
+	//card = new Treatment(Treatment::ETreatmentType::INFECTION);
+	//card->id = counter;
+	//tmpDeck.push_back(card);
+	//counter++;
+	//for (int i = 0; i < 2; i++)
+	//{
+	//	for (int j = 0; j < 3; j++)
+	//	{
+	//		switch (i)
+	//		{
+	//		case 0:
+	//			card = new Treatment(Treatment::ETreatmentType::ORGANTHIEF);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		case 1:
+	//			card = new Treatment(Treatment::ETreatmentType::TRASPLANT);
+	//			card->id = counter;
+	//			tmpDeck.push_back(card);
+	//			break;
+	//		}
+	//		counter++;
+	//	}
+	//}
 	card = new Treatment(Treatment::ETreatmentType::LATEXGLOVE);
 	card->id = counter;
 	tmpDeck.push_back(card);
 	counter++;
-	card = new Treatment(Treatment::ETreatmentType::MEDICALERROR);
-	card->id = counter;
-	tmpDeck.push_back(card);
-	counter++;
+	//card = new Treatment(Treatment::ETreatmentType::MEDICALERROR);
+	//card->id = counter;
+	//tmpDeck.push_back(card);
+	//counter++;
 
 	FillDeck(tmpDeck);
 }
@@ -229,5 +229,20 @@ void Maze::DiscardOtherCard(Player& p, Card* c, int i, int id)
 	for (Card* c : tmpCards)
 	{
 		p.otherhands.at(i).push_back(c);
+	}
+}
+
+void Maze::DiscardAllOtherHandCards(Player& p)
+{
+	for (auto c : p.otherhands)
+	{
+		for (auto c2 : c)
+		{
+			discardDeck.push(c2);
+		}
+	}
+	for (int i = 0; i < p.otherhands.size(); i++)
+	{
+		p.otherhands.at(i).clear();
 	}
 }

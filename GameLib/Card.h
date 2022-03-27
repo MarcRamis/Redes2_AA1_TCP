@@ -33,4 +33,5 @@ public:
 	Organ* GetOrganCard();
 	Virus* GetVirusCard();
 	Medicine* GetMedicineCard();
+	Treatment* GetTreatmentCard();
 };

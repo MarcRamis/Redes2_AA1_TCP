@@ -1,5 +1,7 @@
 #include "Treatment.h"
 
+#include "Player.h"
+
 Treatment::Treatment()
 {
 }
@@ -43,3 +45,8 @@ void Treatment::Play(Player& p, Card* cardToEffect, int id)
 {
 }
 
+void Treatment::PlayLatexGlove(Player& p, int id)
+{
+	p.maze->DiscardCard(p,this, id);
+	p.maze->DiscardAllOtherHandCards(p);
+}

@@ -227,6 +227,24 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 
 				break;
 			case Card::EType::TREATMENT:
+
+				switch (player.hand.at(selection - 1)->GetTreatmentCard()->type)
+				{
+				case Treatment::ETreatmentType::INFECTION:
+					break;
+				case Treatment::ETreatmentType::ORGANTHIEF:
+					break;
+				case Treatment::ETreatmentType::TRASPLANT:
+					break;
+				case Treatment::ETreatmentType::LATEXGLOVE:
+					player.hand.at(selection - 1)->GetTreatmentCard()->PlayLatexGlove(player,selection - 1);
+					endTurn = !endTurn;
+					break;
+				case Treatment::ETreatmentType::MEDICALERROR:
+					break;
+				default:
+					break;
+				}
 				break;
 			case Card::EType::VIRUS:
 

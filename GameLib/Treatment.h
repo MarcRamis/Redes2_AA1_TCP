@@ -11,4 +11,5 @@ public:
 
 	void Draw();
 	void Play(Player& p, Card* cardToEffect, int id);
+	void PlayLatexGlove(Player &p, int id);
 };
