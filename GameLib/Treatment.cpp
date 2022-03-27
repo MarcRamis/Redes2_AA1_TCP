@@ -60,3 +60,13 @@ void Treatment::PlayLatexGlove(Player& p, int id)
 		}
 	}
 }
+
+void Treatment::PlayOrganThief(Player& p, int id, int playerToAffect, int idCardAffected)
+{
+	// Push to my played cards
+	p.playedCards.push_back(p.otherPlayedCards.at(playerToAffect).at(idCardAffected));
+	// Erase from that other player 
+	p.otherPlayedCards.at(playerToAffect).erase(p.otherPlayedCards.at(playerToAffect).begin() + idCardAffected);
+	// Discard the used card
+	p.maze->DiscardCard(p, this, id);
+}

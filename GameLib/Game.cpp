@@ -234,34 +234,48 @@ void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
 				switch (player.hand.at(selection - 1)->GetTreatmentCard()->type)
 				{
 				case Treatment::ETreatmentType::INFECTION:
-					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
-					{
 
+					if (selectionToAffect != -1)
+					{
+						if (player.otherPlayedCards
+							.at(GetIDFromSelectedPlayer(player, selectionToAffect))
+							.at(GetIDFromSelectedCard(player, selectionToAffect))->state != Card::EOrganState::IMMUNIZED)
+						{
+							
+						}
 					}
 					else {
 						std::cout << "This card is immunized" << std::endl;
 					}
 					break;
 				case Treatment::ETreatmentType::ORGANTHIEF:
+					
+					do {
+						std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to steal" << std::endl;
+						std::cin >> selectionToAffect;
 
-					if (player.hand.at(selection - 1)->state == Card::EOrganState::IMMUNIZED)
-					{	 
-						//do {
-						//	std::cout << "Select a card on the table: ( Any of the number next to the card ) or (-1) to exit if there is no organ to infect" << std::endl;
-						//	std::cin >> selectionToAffect;
-						//
-						//} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
-						//
-						//if (OrganAlreadyExistsInTable(player, player.hand.at(selection - 1)))
-						//{
-						//	std::cout << "This card is already played" << std::endl;
-						//}
-						//else
-						//{
-						//	player.hand.at(selection - 1)->Play(player, nullptr, selection - 1);
-						//	//Protocol::Peer::SendPlayOrgan(_clientes, player.id, selection - 1); // send protocol to modify other players 
-						//	endTurn = !endTurn;
-						//}
+					} while (!CorrectIdCardInTable(selectionToAffect, player) && selectionToAffect != -1);
+
+					if (selectionToAffect != -1)
+					{
+						if (player.otherPlayedCards
+							.at(GetIDFromSelectedPlayer(player, selectionToAffect))
+							.at(GetIDFromSelectedCard(player, selectionToAffect))->state != Card::EOrganState::IMMUNIZED)
+						{
+							if (OrganAlreadyExistsInTable(player, player.otherPlayedCards
+								.at(GetIDFromSelectedPlayer(player, selectionToAffect))
+								.at(GetIDFromSelectedCard(player, selectionToAffect))))
+							{
+								std::cout << "This card is already played" << std::endl;
+							}
+							else
+							{
+								player.hand.at(selection - 1)->GetTreatmentCard()->PlayOrganThief(player, selection - 1,
+									GetIDFromSelectedPlayer(player, selectionToAffect), GetIDFromSelectedCard(player, selectionToAffect));
+								Protocol::Peer::SendOrganThief(_clientes, player.id, selection - 1, selectionToAffect); // send protocol to modify other players 
+								endTurn = !endTurn;
+							}
+						}
 					}
 					else {
 						std::cout << "This card is immunized" << std::endl;
@@ -530,28 +544,6 @@ bool Game::WinCondition(std::vector<TcpSocket*>* _clientes, Player player)
 		Protocol::Peer::YouLost(_clientes);
 		return true;
 	}
-	//else
-	//{
-	//	// Check if other players have won
-	//	for (int i = 0; i < player.otherPlayedCards.size(); i++)
-	//	{
-	//		tmpAmmount = 0;
-	//		for (int j = 0; j < player.otherPlayedCards.at(i).size(); j++)
-	//		{
-	//			Card tempCard = *player.otherPlayedCards.at(i).at(j);
-
-	//			if (tempCard.cardType == Card::EType::ORGAN && tempCard.state != Card::EOrganState::INFECTED)
-	//			{
-	//				tmpAmmount++;
-	//			}
-	//		}
-	//		//std::cout << "Other: " << tmpAmmount << std::endl;
-	//		if (tmpAmmount == 4)
-	//		{
-	//			return true;
-	//		}
-	//	}
-	//}
 
 	return false;
 }
@@ -630,7 +622,7 @@ bool Game::OrganAlreadyExistsInTable(Player& player, Card* c)
 {
 	for (int i = 0; i < player.playedCards.size(); i++)
 	{
-		if (c->GetOrganCard()->type == player.playedCards.at(i)->GetOrganCard()->type)
+		if (c->GetOrganCard()->type == player.playedCards.at(i)->GetOrganCard()->type) 
 		{
 			return true;
 		}

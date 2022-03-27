@@ -26,8 +26,8 @@ void Protocol::Peer::Chat(std::vector<TcpSocket*>* _clientes, bool& isChat)
 		if (isChat)
 		{
 			std::cout << "Write a message: " << std::endl;
-			//std::getline(std::cin, opc);
-			std::cin >> opc;
+			std::getline(std::cin, opc);
+			//std::cin >> opc;
 
 			OutputMemoryStream pack;
 			pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::SENDMESSAGE));
@@ -89,7 +89,7 @@ void Protocol::Peer::SendInfectOrgan(std::vector<TcpSocket*>* _clientes, int idP
 		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::INFECTORGAN));
 
 		pack.Write(idPlayerThatUsedCard); pack.Write(idCardPlayed); // id player that used a card & the position of his card
-		pack.Write(idCardFromPlayerAffected); // id player that the card has affected & the id of his card
+		pack.Write(idCardFromPlayerAffected); // id player that the card has affected
 
 		Status status = _clientes->at(i)->Send(pack);
 		if (status.GetStatus() != Status::EStatusType::DONE)
@@ -340,4 +340,55 @@ void Protocol::Peer::ReceivedLatexGlove(std::vector<TcpSocket*>* _clientes, Inpu
 			allDraw = true;
 		}
 	}
+}
+
+void Protocol::Peer::SendOrganThief(std::vector<TcpSocket*>* _clientes, int idPlayerThatUsedCard, int idCardPlayed, int idCardFromPlayerAffected)
+{
+	OutputMemoryStream pack;
+	for (int i = 0; i < _clientes->size(); i++)
+	{
+		pack.Write(static_cast<int>(Protocol::PEER_PEERProtocol::ORGANTHIEF));
+
+		pack.Write(idPlayerThatUsedCard); pack.Write(idCardPlayed); // id player that used a card & the position of his card
+		pack.Write(idCardFromPlayerAffected); // id player that the card has affected
+
+		Status status = _clientes->at(i)->Send(pack);
+		if (status.GetStatus() != Status::EStatusType::DONE)
+		{
+			std::cout << "El mensaje Peer2Peer no se ha enviado: [ No se ha enviado la carta jugada ]" << std::endl;
+		}
+	}
+}
+
+void Protocol::Peer::ReceivedOrganThief(std::vector<TcpSocket*>* _clientes, InputMemoryStream pack, Player& p)
+{
+	// Read all ids
+	int idPlayerThatUsedCard = 0; int idCardPlayed = 0; int idCardFromPlayerAffected = 0;
+	pack.Read(&idPlayerThatUsedCard); pack.Read(&idCardPlayed);
+	pack.Read(&idCardFromPlayerAffected);
+	
+	int id_card = p.FindPositionCardbyIDCardInPlayedCards(idCardFromPlayerAffected); // find player that has been affected by the card
+	int i = p.FindPlayerInOtherIdPlayers(idPlayerThatUsedCard); // find player that used the card
+
+	// search if the player is me
+	if (id_card != -1)
+	{
+		// Push to that other played cards
+		p.otherPlayedCards.at(i).push_back(p.playedCards.at(id_card));
+		// Erase to my played cards
+		p.playedCards.erase(p.playedCards.begin() + id_card);
+	}
+	else
+	{
+		id_card = p.FindPositionCardbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+		int id_player = p.FindPositionPlayerbyIDCardInOtherPlayedCards(idCardFromPlayerAffected);
+		
+		// Push to the player that stole it
+		p.otherPlayedCards.at(i).push_back(p.otherPlayedCards.at(id_player).at(id_card));
+		// Erase from that other player that the first one stole the organ
+		p.otherPlayedCards.at(id_player).erase(p.otherPlayedCards.at(id_player).begin() + id_card);
+	}
+
+	// Discard the used card
+	p.maze->DiscardOtherCard(p, p.otherhands.at(i).at(idCardPlayed), i, idCardPlayed);
 }

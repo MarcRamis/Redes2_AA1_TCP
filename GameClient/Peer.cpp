@@ -360,6 +360,12 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 									game.DrawGame(_clientes, player);
 									
 									break;
+
+								case Protocol::PEER_PEERProtocol::ORGANTHIEF:
+									Protocol::Peer::ReceivedOrganThief(_clientes, packet, player);
+									game.NextTurn(_clientes, player);
+									break;
+									
 								case Protocol::PEER_PEERProtocol::ISREADY:
 									game.gameReady.at(it) = true;
 									std::cout << _clientes->at(it)->GetRemotePort().port << ": Player remote is ready" << std::endl;
