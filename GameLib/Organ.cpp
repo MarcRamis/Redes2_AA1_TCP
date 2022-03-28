@@ -39,15 +39,15 @@ void Organ::Draw()
 
 	if (state == Card::EOrganState::INFECTED)
 	{
-		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << "<- IN | ";
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << static_cast<char>(4) << " IN";
 	}
 	else if (state == Card::EOrganState::IMMUNIZED)
 	{
-		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << "<- IM | ";
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << static_cast<char>(3) << " IM";
 	}
 	else if (state == Card::EOrganState::VACUNATED)
 	{
-		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << "<- V | ";
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << static_cast<char>(2) << " V";
 	}
 
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);

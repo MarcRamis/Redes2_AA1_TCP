@@ -339,6 +339,7 @@ void ControlPeers(std::vector<TcpSocket*>* _clientes, Selector* _selector, TcpLi
 
 									std::cout << "Closing program in T-20" << std::endl;
 									ConsoleWait(20000.f);
+									mtxConexiones.unlock();
 									exit(0);
 
 									break;

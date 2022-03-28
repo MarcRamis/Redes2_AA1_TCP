@@ -150,16 +150,15 @@ void Game::DrawGame(std::vector<TcpSocket*>* _clientes, Player& player)
 	std::cout << std::endl << std::endl;
 
 	// HUD --> (OTHER HANDS)
-	for (auto c : player.otherhands)
-	{
-		std::cout << "Other hands: " << std::endl;
-		for (auto c2 : c)
-		{
-			c2->Draw();
-		}
-		std::cout << std::endl;
-	}
-
+	//for (auto c : player.otherhands)
+	//{
+	//	std::cout << "Other hands: " << std::endl;
+	//	for (auto c2 : c)
+	//	{
+	//		c2->Draw();
+	//	}
+	//	std::cout << std::endl;
+	//}
 }
 
 void Game::PlayCard(std::vector<TcpSocket*>* _clientes, Player& player)
