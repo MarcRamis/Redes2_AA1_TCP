@@ -10,4 +10,6 @@ public:
 	Medicine(EMedicineType _type);
 
 	void Draw();
+	void VacunateOrgan(Player& p, int idCardToAffect, int id);
+	void Vacunate(Card *c);
 };

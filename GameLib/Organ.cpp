@@ -1,5 +1,7 @@
 #include "Organ.h"
 
+#include "Player.h"
+
 Organ::Organ()
 {
 }
@@ -8,6 +10,7 @@ Organ::Organ(EOrganType _type) : type(_type) { cardType = EType::ORGAN; };
 
 void Organ::Draw()
 {
+
 	switch (type)
 	{
 	case Organ::EOrganType::JOKER:
@@ -34,20 +37,38 @@ void Organ::Draw()
 		break;
 	}
 
+	if (state == Card::EOrganState::INFECTED)
+	{
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << static_cast<char>(4) << " IN";
+	}
+	else if (state == Card::EOrganState::IMMUNIZED)
+	{
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << static_cast<char>(3) << " IM";
+	}
+	else if (state == Card::EOrganState::VACUNATED)
+	{
+		ConsoleSetColor(ConsoleColor::DARKGREY, ConsoleColor::WHITE); std::cout << static_cast<char>(2) << " V";
+	}
+
 	ConsoleSetColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
 }
 
-void Organ::ImmunizeOrgan()
-{ 
-	std::cout << "Inmunizar" << std::endl; 
-}
-
-void Organ::InfectateOrgan()
-{ 
-	std::cout << "Infectar" << std::endl;
-}
-
-void Organ::VacunateOrgan()
+void Organ::Play(Player& p, Card* cardToAffect, int id)
 {
-	std::cout << "Vacunar" << std::endl; 
+	// Add to played cards
+	p.playedCards.push_back(this);
+	// Delete from his hand
+	p.hand.erase(p.hand.begin() + id);
+	// Draw new card
+	std::vector<Card*> tmpCards = p.maze->DealCards(1);
+	for (Card* c : tmpCards)
+	{
+		p.hand.push_back(c);
+		std::cout << "You drawn: "; c->Draw(); std::cout << std::endl;
+	}
+}
+
+Organ::EOrganType Organ::GetType(Organ* organ)
+{
+	return organ->type;
 }

@@ -10,4 +10,7 @@ public:
 	Treatment(ETreatmentType _type);
 
 	void Draw();
+	void Play(Player& p, Card* cardToEffect, int id);
+	void PlayLatexGlove(Player& p, int id);
+	void PlayOrganThief(Player &p, int id, int playerToAffect, int idCardAffected);
 };
